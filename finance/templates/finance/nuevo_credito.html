@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Recepción de Crédito (Nuevo Techo){% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 600px; margin: 0 auto;">
+    <div style="margin-bottom: 2rem;">
+        <h2 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">Cargar Nuevo Crédito Presupuestario
+        </h2>
+        <p style="color: var(--text-muted);">Ingrese los detalles del crédito recibido por la Autoridad Superior
+            (AA.AA.PP.).</p>
+    </div>
+
+    <form method="POST">
+        {% csrf_token %}
+        <div style="display: grid; gap: 1.5rem;">
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem;">Año Fiscal</label>
+                    {{ form.anio }}
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem;">Trimestre</label>
+                    {{ form.trimestre }}
+                </div>
+            </div>
+
+            <div>
+                <label style="display: block; margin-bottom: 0.5rem;">Programa Presupuestario</label>
+                {{ form.programa }}
+            </div>
+
+            <div>
+                <label style="display: block; margin-bottom: 0.5rem;">Fuente de Financiamiento</label>
+                {{ form.fuente }}
+            </div>
+
+            <div>
+                <label style="display: block; margin-bottom: 0.5rem;">Monto Total (Techo)</label>
+                {{ form.monto_total }}
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1rem;">
+                <a href="{% url 'finance:lista_creditos' %}" class="btn"
+                    style="color: white; text-decoration: none;">Cancelar</a>
+                <button type="submit" class="btn btn-primary">Guardar Crédito</button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

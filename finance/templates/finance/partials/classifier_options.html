@@ -1,0 +1,8 @@
+<label style="display: block; margin-bottom: 0.5rem; color: var(--text-muted);">Desagregación</label>
+<select name="clasificador_gasto" class="form-input"
+    style="width: 100%; padding: 0.5rem; background: var(--bg-dark); color: white; border: 1px solid var(--border); border-radius: 0.5rem;">
+    <option value="">Seleccione...</option>
+    {% for c in options %}
+    <option value="{{ c.id }}">{{ c.codigo }} - {{ c.descripcion }}</option>
+    {% endfor %}
+</select>

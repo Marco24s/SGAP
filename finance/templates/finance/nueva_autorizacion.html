@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Nueva Autorización de Cargo{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 600px; margin: 0 auto;">
+    <form method="POST">
+        {% csrf_token %}
+        <div style="display: grid; gap: 1rem;">
+
+            <div>
+                <label style="display: block; margin-bottom: 0.5rem;">Unidad Pagadora (Mi Unidad)</label>
+                {{ form.unidad_origen }}
+            </div>
+
+            <div>
+                <label style="display: block; margin-bottom: 0.5rem;">Unidad Autorizada (Quién Gastará)</label>
+                {{ form.unidad_autorizada }}
+            </div>
+
+            <div>
+                <label style="display: block; margin-bottom: 0.5rem;">Concepto (Clasificador)</label>
+                {{ form.clasificador }}
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem;">Monto Máximo</label>
+                    {{ form.monto_maximo }}
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem;">Vencimiento</label>
+                    {{ form.vencimiento }}
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1rem;">
+                <a href="{% url 'finance:lista_autorizaciones' %}" class="btn"
+                    style="text-decoration: none; color: white;">Cancelar</a>
+                <button type="submit" class="btn btn-primary">Autorizar</button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

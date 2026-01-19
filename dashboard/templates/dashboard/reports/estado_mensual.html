@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Reporte: Estado Crediticio Mensual{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <div>
+            <h2 style="margin: 0;">Estado Crediticio Mensual</h2>
+            <p style="color: var(--text-muted); margin: 0;">Generado el: {{ fecha|date:"d/m/Y H:i" }}</p>
+        </div>
+        <div style="display: flex; gap: 1rem;">
+            <a href="{% url 'dashboard:export_csv' %}" class="btn btn-primary" style="text-decoration: none;">Descargar
+                CSV</a>
+            <button onclick="window.print()" class="btn"
+                style="background: transparent; border: 1px solid var(--border); color: white;">Imprimir</button>
+        </div>
+    </div>
+
+    <style>
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+
+            .card,
+            .card * {
+                visibility: visible;
+            }
+
+            .card {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                border: none;
+                background: white;
+                color: black;
+            }
+
+            .no-print {
+                display: none;
+            }
+
+            table {
+                font-size: 10pt;
+                color: black;
+            }
+
+            th {
+                background: #f3f4f6 !important;
+                color: black !important;
+            }
+
+            td {
+                color: black !important;
+                border-bottom: 1px solid #ddd;
+            }
+        }
+    </style>
+
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="text-align: left; border-bottom: 2px solid var(--border);">
+                    <th style="padding: 1rem;">Programa / Fuente</th>
+                    <th style="padding: 1rem;">Unidad Ejecutora</th>
+                    <th style="padding: 1rem;">Clasificador</th>
+                    <th style="padding: 1rem; text-align: right;">Asignado</th>
+                    <th style="padding: 1rem; text-align: right;">Ejecutado</th>
+                    <th style="padding: 1rem; text-align: right;">Saldo</th>
+                    <th style="padding: 1rem; text-align: center;">%</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in report_data %}
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <td style="padding: 0.75rem;">
+                        <div style="font-weight: 600;">{{ row.programa.codigo }}</div>
+                        <small style="color: var(--text-muted);">FF {{ row.fuente.codigo }}</small>
+                    </td>
+                    <td style="padding: 0.75rem;">
+                        {{ row.unidad.codigo }} - {{ row.unidad.nombre }}
+                    </td>
+                    <td style="padding: 0.75rem;">
+                        <span
+                            style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; font-family: monospace;">
+                            {{ row.clasificador.codigo }}
+                        </span>
+                        <br>
+                        <small style="color: var(--text-muted);">{{ row.clasificador.descripcion }}</small>
+                    </td>
+                    <td style="padding: 0.75rem; text-align: right; font-weight: 500;">
+                        ${{ row.asignado }}
+                    </td>
+                    <td style="padding: 0.75rem; text-align: right; color: #f59e0b;">
+                        ${{ row.ejecutado }}
+                    </td>
+                    <td style="padding: 0.75rem; text-align: right; color: var(--success);">
+                        ${{ row.saldo }}
+                    </td>
+                    <td style="padding: 0.75rem; text-align: center;">
+                        {% if row.porcentaje > 90 %}
+                        <span style="color: #ef4444; font-weight: bold;">{{ row.porcentaje }}%</span>
+                        {% else %}
+                        <span>{{ row.porcentaje }}%</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" style="text-align: center; padding: 2rem;">No hay datos para mostrar.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

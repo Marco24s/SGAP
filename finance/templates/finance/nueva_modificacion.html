@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Nueva Modificación Presupuestaria{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 800px; margin: 0 auto;">
+    <form method="POST">
+        {% csrf_token %}
+
+        <div style="display: grid; gap: 1.5rem;">
+            <!-- Errors -->
+            {% if form.errors %}
+            <div
+                style="background: rgba(239, 68, 68, 0.1); border: 1px solid var(--danger); padding: 1rem; border-radius: 0.5rem;">
+                <p style="color: var(--danger); margin: 0;">Por favor corrija los errores del formulario.</p>
+                {{ form.non_field_errors }}
+            </div>
+            {% endif %}
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem;">Origen (Quién cede)</label>
+                    {{ form.origen }}
+                    <small style="color: var(--danger);">{{ form.origen.errors }}</small>
+                </div>
+
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem;">Destino (Quién recibe)</label>
+                    {{ form.destino }}
+                    <small style="color: var(--danger);">{{ form.destino.errors }}</small>
+                </div>
+            </div>
+
+            <div>
+                <label style="display: block; margin-bottom: 0.5rem;">Monto a Transferir</label>
+                {{ form.monto }}
+                <small style="color: var(--danger);">{{ form.monto.errors }}</small>
+            </div>
+
+            <div
+                style="background: rgba(59, 130, 246, 0.05); padding: 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: var(--text-muted);">
+                <strong>Nota:</strong> Si el movimiento es dentro del mismo Programa, se aprobará automáticamente.
+                Si es entre distintos Programas, quedará en estado <em>Pendiente</em> para revisión del AA.AA.PP.
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1rem;">
+                <a href="{% url 'finance:modificaciones' %}" class="btn"
+                    style="background: transparent; border: 1px solid var(--border); color: var(--text-main); text-decoration: none;">Cancelar</a>
+                <button type="submit" class="btn btn-primary">Registrar Solicitud</button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Créditos Disponibles para Distribución{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <p class="mb-4" style="margin: 0;">Seleccione el crédito presupuestario que desea distribuir.</p>
+        <a href="{% url 'finance:nuevo_credito' %}" class="btn btn-primary">+ Recepcionar Crédito</a>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Programa</th>
+                <th>Fuente Financiamiento</th>
+                <th>Periodo</th>
+                <th>Estado</th>
+                <th>Monto</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for c in creditos %}
+            <tr>
+                <td>{{ c.programa }}</td>
+                <td>{{ c.fuente.codigo }} - {{ c.fuente.descripcion }}</td>
+                <td>{{ c.anio }} / T{{ c.trimestre }}</td>
+                <td>
+                    <span
+                        style="padding: 2px 6px; border-radius: 4px; background: rgba(16, 185, 129, 0.2); color: #10b981;">
+                        {{ c.estado }}
+                    </span>
+                </td>
+                <td>${{ c.monto_total }}</td>
+                <td>
+                    <a href="{% url 'finance:distribuir_credito' c.id %}" class="btn btn-primary">Distribuir</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

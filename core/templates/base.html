@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S.G.A.P. - Armada Argentina</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+</head>
+
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="logo-area">
+                <div class="logo-icon">⚓</div>
+                <h2>S.G.A.P.</h2>
+            </div>
+            <nav>
+                <a href="{% url 'dashboard:home' %}" class="nav-item">Dashboard</a>
+                <a href="{% url 'finance:lista_creditos' %}" class="nav-item">Distribución</a>
+                <a href="{% url 'finance:modificaciones' %}" class="nav-item">Modificaciones</a>
+                <a href="{% url 'finance:lista_autorizaciones' %}" class="nav-item">Autorizaciones</a>
+                <a href="{% url 'dashboard:reporte_estado_mensual' %}" class="nav-item">Reportes</a>
+            </nav>
+        </aside>
+
+        <main class="content-area">
+            <header class="top-bar">
+                <h1>{% block page_title %}Panel de Control{% endblock %}</h1>
+                <div class="user-profile">
+                    <span>AA.PP. Generico</span>
+                </div>
+            </header>
+
+            <div class="content-wrapper">
+                {% block content %}
+                {% endblock %}
+            </div>
+        </main>
+    </div>
+</body>
+
+</html>

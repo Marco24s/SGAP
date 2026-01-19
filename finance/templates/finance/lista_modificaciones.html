@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Gestión de Modificaciones y Desvíos{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <p style="margin: 0; color: var(--text-muted);">Historial de movimientos entre partidas y programas.</p>
+        <a href="{% url 'finance:nueva_modificacion' %}" class="btn btn-primary">+ Nueva Solicitud</a>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Tipo</th>
+                <th>Origen</th>
+                <th>Destino</th>
+                <th>Monto</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for m in modificaciones %}
+            <tr>
+                <td>{{ m.fecha_solicitud|date:"d/m/Y" }}</td>
+                <td>{{ m.get_tipo_display }}</td>
+                <td>
+                    <div style="font-weight: 500;">{{ m.origen.uucc.codigo }}</div>
+                    <small style="color: var(--text-muted);">{{ m.origen.clasificador_gasto.codigo }}</small>
+                </td>
+                <td>
+                    <div style="font-weight: 500;">{{ m.destino.uucc.codigo }}</div>
+                    <small style="color: var(--text-muted);">{{ m.destino.clasificador_gasto.codigo }}</small>
+                </td>
+                <td>${{ m.monto }}</td>
+                <td>
+                    {% if m.estado == 'APROBADO' %}
+                        <span style="color: var(--success); background: rgba(16, 185, 129, 0.1); padding: 2px 8px; border-radius: 4px;">Aprobado</span>
+                    {% elif m.estado == 'PENDIENTE' %}
+                        <span style="color: #facc15; background: rgba(250, 204, 21, 0.1); padding: 2px 8px; border-radius: 4px;">Pendiente</span>
+                    {% else %}
+                        <span>{{ m.estado }}</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" style="text-align: center; padding: 2rem;">No hay modificaciones registradas.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

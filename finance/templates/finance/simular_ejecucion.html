@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Simulación de Ejecución (Gasto){% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 600px; margin: 0 auto;">
+    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+        Esta herramienta permite registrar gastos (Compromisos) a nombre de las Unidades Componentes
+        para probar el impacto en el Tablero de Control y las Alertas de saldo.
+    </p>
+
+    <form method="POST">
+        {% csrf_token %}
+        <div style="display: grid; gap: 1rem;">
+            <div>
+                <label style="display: block; margin-bottom: 0.5rem;">Asignación (Partida de UU.CC.)</label>
+                <select name="asignacion" class="form-input"
+                    style="width: 100%; padding: 0.5rem; background: var(--bg-dark); color: white; border: 1px solid var(--border); border-radius: 0.5rem;">
+                    {% for a in asignaciones %}
+                    <option value="{{ a.id }}">{{ a.uucc.codigo }} - {{ a.clasificador_gasto.codigo }} (Disp: ${{
+                        a.monto }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label style="display: block; margin-bottom: 0.5rem;">Monto a Ejecutar</label>
+                <input type="number" name="monto" class="form-input"
+                    style="width: 100%; padding: 0.5rem; background: var(--bg-dark); color: white; border: 1px solid var(--border); border-radius: 0.5rem;">
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1rem;">
+                <a href="/" class="btn" style="color: white; text-decoration: none;">Volver al Dashboard</a>
+                <button type="submit" class="btn btn-primary">Registrar Gasto</button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
