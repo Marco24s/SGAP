@@ -19,6 +19,14 @@ class Credito(models.Model):
     def __str__(self):
         return f"Credito {self.anio}-T{self.trimestre} - {self.programa} - ${self.monto_total}"
 
+    @property
+    def saldo_disponible(self):
+        """
+        Returns the unassigned amount of this Credit.
+        """
+        asignado = self.asignaciones.aggregate(total=models.Sum('monto'))['total'] or 0
+        return self.monto_total - asignado
+
 class Asignacion(models.Model):
     TRIMESTRE_CHOICES = (
         (1, "1° Trimestre"),

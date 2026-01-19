@@ -40,15 +40,10 @@ def distribuir_credito(request, credito_id):
             # Expected format: amount_INCISOID, detail_INCISOID (optional)
             for key, value in request.POST.items():
                 if key.startswith('monto_') and value:
+                    if key == 'monto_combined_23':
+                        continue
                     inciso_id = key.split('_')[1]
                     monto = float(value)
-                    
-                    # Determine Classifier
-                    # If specific classifier selected (logic for Inciso 1), use that.
-                    # Else use the Inciso itself (for Global)
-                    # For simplicity in this Multi-Select version:
-                    # We will map Inciso ID directly to Classifier ID if it's top-level
-                    # OR check if a sub-classifier was passed
                     
                     # Logic:
                     # 1. Check if 'detalle_INCISOID' exists
@@ -72,6 +67,21 @@ def distribuir_credito(request, credito_id):
                         monto=monto,
                         trimestre=credito.trimestre, # Inherit from Credit
                         obra=obra
+                    )
+            
+            # Special Handling for Combined 2 & 3
+            if request.POST.get('monto_combined_23'):
+                monto_23 = float(request.POST.get('monto_combined_23'))
+                # Assign to Inciso 2 (Bienes) as primary container for "Funcionamiento"
+                # Searching for Inciso 2 by code strictly
+                inciso_2 = ClasificadorGasto.objects.filter(nivel=1, codigo='2').first()
+                if inciso_2:
+                    Asignacion.objects.create(
+                        uucc=uucc,
+                        credito_origen=credito,
+                        clasificador_gasto=inciso_2,
+                        monto=monto_23,
+                        trimestre=credito.trimestre
                     )
             
             messages.success(request, f"Asignación registrada exitosamente para {uucc.codigo}.")
@@ -185,5 +195,16 @@ def simular_ejecucion(request):
         return redirect('finance:simular_ejecucion')
         
     # Get all asignaciones to pick from
-    asignaciones = Asignacion.objects.select_related('uucc', 'clasificador_gasto').all()
-    return render(request, 'finance/simular_ejecucion.html', {'asignaciones': asignaciones})
+    asignaciones_qs = Asignacion.objects.select_related('uucc', 'clasificador_gasto').all()
+    
+    # Pre-format options to avoid template tag issues
+    asignaciones_list = []
+    for a in asignaciones_qs:
+        monto_fmt = f"{a.monto:,.0f}".replace(",", "X").replace(".", ",").replace("X", ".")
+        label = f"{a.uucc.codigo} - {a.clasificador_gasto.codigo} (Disp: ${monto_fmt})"
+        asignaciones_list.append({
+            'id': a.id,
+            'label': label
+        })
+
+    return render(request, 'finance/simular_ejecucion.html', {'asignaciones': asignaciones_list})

@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from . import api_views
 
 app_name = 'finance'
 
@@ -14,4 +15,7 @@ urlpatterns = [
     path('simular-ejecucion/', views.simular_ejecucion, name='simular_ejecucion'),
     # HTMX API
     path('api/load-children-classifiers/', views.load_children_classifiers, name='load_children_classifiers'),
+    
+    # JSON API
+    path('api/programs/create/', api_views.create_program, name='api_create_program'),
 ]

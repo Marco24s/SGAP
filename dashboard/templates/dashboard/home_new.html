@@ -11,20 +11,16 @@
     <div
         style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
         <div style="background: rgba(59, 130, 246, 0.1); padding: 1rem; border-radius: 0.5rem; text-align: center;">
-            <div style="color: var(--primary); font-size: 2rem; font-weight: bold;">${{
-                total_presupuesto|default:"0"|floatformat:0|intcomma }}</div>
+            <div style="color: var(--primary); font-size: 2rem; font-weight: bold;">${{ total_presupuesto }}</div>
             <div style="color: var(--text-muted); font-size: 0.9rem;">Techo Presupuestario</div>
         </div>
         <div style="background: rgba(16, 185, 129, 0.1); padding: 1rem; border-radius: 0.5rem; text-align: center;">
-            <div style="color: var(--success); font-size: 2rem; font-weight: bold;">${{
-                total_asignado|default:"0"|floatformat:0|intcomma }}</div>
+            <div style="color: var(--success); font-size: 2rem; font-weight: bold;">${{ total_asignado }}</div>
             <div style="color: var(--text-muted); font-size: 0.9rem;">Distribuido</div>
         </div>
         <div style="background: rgba(245, 158, 11, 0.1); padding: 1rem; border-radius: 0.5rem; text-align: center;">
-            <div style="color: #f59e0b; font-size: 2rem; font-weight: bold;">${{
-                total_ejecutado|default:"0"|floatformat:0|intcomma }}</div>
-            <div style="color: var(--text-muted); font-size: 0.9rem;">Ejecutado ({{ porcentaje_global|default:"0" }}%)
-            </div>
+            <div style="color: #f59e0b; font-size: 2rem; font-weight: bold;">${{ total_ejecutado }}</div>
+            <div style="color: var(--text-muted); font-size: 0.9rem;">Ejecutado ({{ porcentaje_global }}%)</div>
         </div>
     </div>
 </div>
@@ -46,8 +42,8 @@
             {% for u in unidades_stats %}
             <tr>
                 <td>{{ u.unidad.codigo }} - {{ u.unidad.nombre }}</td>
-                <td>${{ u.asignado|floatformat:0|intcomma }}</td>
-                <td>${{ u.ejecutado|floatformat:0|intcomma }}</td>
+                <td>${{ u.asignado }}</td>
+                <td>${{ u.ejecutado }}</td>
                 <td>
                     <div style="width: 100%; background: #334155; border-radius: 4px; height: 8px;">
                         <div
@@ -57,13 +53,11 @@
                     <small>{{ u.porcentaje }}%</small>
                 </td>
                 <td>
-                    {% if u.color == 'danger' %}
-                    <span style="color: #ef4444;">⚠ Crítico</span>
-                    {% elif u.color == 'warning' %}
-                    <span style="color: #f59e0b;">⚠ Subejecución</span>
-                    {% else %}
-                    <span style="color: #10b981;">Normal</span>
-                    {% endif %}
+                <td>
+                    <span
+                        style="font-weight: bold; color: {% if u.color == 'danger' %}#ef4444{% elif u.color == 'warning' %}#f59e0b{% elif u.color == 'success' %}#10b981{% else %}#3b82f6{% endif %};">
+                        {{ u.label }}
+                    </span>
                 </td>
             </tr>
             {% endfor %}

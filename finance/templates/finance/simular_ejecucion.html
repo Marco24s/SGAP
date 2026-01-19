@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load humanize %}
 
 {% block page_title %}Simulación de Ejecución (Gasto){% endblock %}
 
@@ -17,8 +18,7 @@
                 <select name="asignacion" class="form-input"
                     style="width: 100%; padding: 0.5rem; background: var(--bg-dark); color: white; border: 1px solid var(--border); border-radius: 0.5rem;">
                     {% for a in asignaciones %}
-                    <option value="{{ a.id }}">{{ a.uucc.codigo }} - {{ a.clasificador_gasto.codigo }} (Disp: ${{
-                        a.monto }})</option>
+                    <option value="{{ a.id }}">{{ a.label }}</option>
                     {% endfor %}
                 </select>
             </div>

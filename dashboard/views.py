@@ -28,32 +28,51 @@ def home(request):
         pc = (ejecutado / asignado * 100) if asignado > 0 else 0
         
         # Traffic Light Logic
-        # > 90% Red (Danger of Overdraft due to pending?) - Or Green? 
-        # SRS: "Semáforo de Compromiso: Mostrar % de ejecución... Límites"
-        # Let's interpret: < 50% Warning (Idle), > 95% Critical (Full), 50-95 Normal.
-        # Actually user wants "Control": 
-        # "Alerta Saldos Ociosos": If end of quarter and not used.
+        # New Logic:
+        # < 40%: Warning (Subejecución)
+        # > 95%: Success (Meta Alcanzada)
+        # Else: Normal (En Ejecución)
         
-        status_color = "success" # Green
+        status_color = "primary" 
+        status_label = "En Ejecución"
+        
         if pc < 40:
-            status_color = "warning" # Yellow (Under-execution)
-        elif pc > 95:
-            status_color = "danger" # Red (Near Limit)
+            status_color = "warning"
+            status_label = "Subejecución"
+        elif pc >= 95:
+            status_color = "success"
+            status_label = "Meta Alcanzada"
             
         unidades_stats.append({
             'unidad': u,
-            'asignado': asignado,
+            'asignado': asignado, # Will be formatted later
             'ejecutado': ejecutado,
             'porcentaje': round(pc, 1),
-            'color': status_color
+            'color': status_color,
+            'label': status_label
         })
+
+    # Helper for formatting
+    def fmt(value):
+        # Format as 1,000,000 then swap to 1.000.000 for AR
+        return f"{value:,.0f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
     context = {
         'creditos': creditos_vigentes,
-        'total_presupuesto': total_presupuesto,
-        'total_asignado': total_asignado,
-        'total_ejecutado': total_ejecutado,
+        # Formatting directly in Python to avoid template issues
+        'total_presupuesto': fmt(total_presupuesto),
+        'total_asignado': fmt(total_asignado),
+        'total_ejecutado': fmt(total_ejecutado),
         'porcentaje_global': round(porcentaje_global, 1),
-        'unidades_stats': unidades_stats
+        'unidades_stats': [
+            {
+                'unidad': u['unidad'],
+                'asignado': fmt(u['asignado']),
+                'ejecutado': fmt(u['ejecutado']),
+                'porcentaje': u['porcentaje'],
+                'color': u['color'],
+                'label': u['label']
+            } for u in unidades_stats
+        ]
     }
-    return render(request, 'dashboard/home.html', context)
+    return render(request, 'dashboard/home_new.html', context)
