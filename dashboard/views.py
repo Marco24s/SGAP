@@ -1,8 +1,10 @@
 from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
 from finance.models import Credito, Asignacion, Compromiso
 from core.models import UnidadComponente
 from django.db.models import Sum, F
 
+@login_required
 def home(request):
     # 1. Global Summaries
     creditos_vigentes = Credito.objects.filter(estado='VIGENTE')

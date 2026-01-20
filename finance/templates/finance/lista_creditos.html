@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load humanize %}
 
 {% block page_title %}Créditos Disponibles para Distribución{% endblock %}
 
@@ -13,32 +14,212 @@
         <thead>
             <tr>
                 <th>Programa</th>
-                <th>Fuente Financiamiento</th>
                 <th>Periodo</th>
-                <th>Estado</th>
-                <th>Monto</th>
+                <th>Fuente Financiamiento</th>
+                <th>Monto Total</th>
                 <th></th>
             </tr>
         </thead>
         <tbody>
-            {% for c in creditos %}
+            {% for grupo in creditos_agrupados %}
             <tr>
-                <td>{{ c.programa }}</td>
-                <td>{{ c.fuente.codigo }} - {{ c.fuente.descripcion }}</td>
-                <td>{{ c.anio }} / T{{ c.trimestre }}</td>
+                <td>{{ grupo.programa }}</td>
+                <td>{{ grupo.anio }} - T{{ grupo.trimestre }}</td>
                 <td>
-                    <span
-                        style="padding: 2px 6px; border-radius: 4px; background: rgba(16, 185, 129, 0.2); color: #10b981;">
-                        {{ c.estado }}
-                    </span>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <strong>${{ grupo.total }}</strong>
+                        {% if grupo.count > 1 %}
+                        <button onclick="showHistoryModal({{ forloop.counter }})"
+                            style="background: none; border: none; cursor: pointer; font-size: 1.2rem; color: #3b82f6; padding: 0.25rem 0.5rem; transition: transform 0.2s;"
+                            onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'"
+                            title="Ver historial ({{ grupo.count }} créditos)">
+                            📋
+                        </button>
+                        {% endif %}
+                    </div>
+
+                    {% if grupo.count > 1 %}
+                    <!-- Modal for this group -->
+                    <div id="modal-{{ forloop.counter }}" class="history-modal" style="display: none;">
+                        <div class="modal-overlay" onclick="closeHistoryModal({{ forloop.counter }})"></div>
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h3>📋 Historial de Créditos</h3>
+                                <button onclick="closeHistoryModal({{ forloop.counter }})"
+                                    class="modal-close">&times;</button>
+                            </div>
+                            <div class="modal-body">
+                                <div
+                                    style="margin-bottom: 1rem; padding: 0.75rem; background: rgba(59, 130, 246, 0.1); border-radius: 0.5rem;">
+                                    <strong>{{ grupo.programa }}</strong><br>
+                                    <span style="color: #94a3b8; font-size: 0.875rem;">{{ grupo.anio }} - T{{
+                                        grupo.trimestre }} | {{ grupo.fuente }}</span>
+                                </div>
+                                <table style="width: 100%; border-collapse: collapse;">
+                                    <thead>
+                                        <tr style="border-bottom: 2px solid #334155;">
+                                            <th
+                                                style="text-align: left; padding: 0.75rem; color: #94a3b8; font-weight: 500;">
+                                                Monto</th>
+                                            <th
+                                                style="text-align: left; padding: 0.75rem; color: #94a3b8; font-weight: 500;">
+                                                Fecha de Creación</th>
+                                            <th
+                                                style="text-align: right; padding: 0.75rem; color: #94a3b8; font-weight: 500;">
+                                                Acción</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for credito in grupo.creditos %}
+                                        <tr style="border-bottom: 1px solid #334155;">
+                                            <td style="padding: 0.75rem; font-weight: 600; color: #3b82f6;">${{
+                                                credito.monto }}</td>
+                                            <td style="padding: 0.75rem; color: #cbd5e1;">{{ credito.fecha }}</td>
+                                            <td style="padding: 0.75rem; text-align: right;">
+                                                <a href="{% url 'finance:distribuir_credito' credito.id %}"
+                                                    class="btn btn-primary"
+                                                    style="font-size: 0.875rem; padding: 0.5rem 1rem;">Gestionar</a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                    <tfoot>
+                                        <tr style="border-top: 2px solid #334155;">
+                                            <td style="padding: 0.75rem; font-weight: 700; color: white;">Total:</td>
+                                            <td colspan="2"
+                                                style="padding: 0.75rem; font-weight: 700; color: #3b82f6; font-size: 1.125rem;">
+                                                ${{ grupo.total }}</td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
                 </td>
-                <td>${{ c.monto_total }}</td>
                 <td>
-                    <a href="{% url 'finance:distribuir_credito' c.id %}" class="btn btn-primary">Distribuir</a>
+                    {% if grupo.count == 1 %}
+                    <a href="{% url 'finance:distribuir_credito' grupo.creditos.0.id %}"
+                        class="btn btn-primary">Gestionar</a>
+                    {% else %}
+                    <button class="btn btn-primary" onclick="showHistoryModal({{ forloop.counter }})">Ver
+                        Opciones</button>
+                    {% endif %}
                 </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
+
+<style>
+    .history-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(4px);
+    }
+
+    .modal-content {
+        position: relative;
+        background: #1e293b;
+        border-radius: 1rem;
+        max-width: 800px;
+        width: 90%;
+        max-height: 80vh;
+        overflow: hidden;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        animation: modalSlideIn 0.3s ease-out;
+    }
+
+    @keyframes modalSlideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-50px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.5rem;
+        border-bottom: 1px solid #334155;
+    }
+
+    .modal-header h3 {
+        margin: 0;
+        font-size: 1.5rem;
+        color: white;
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 2rem;
+        color: #94a3b8;
+        cursor: pointer;
+        padding: 0;
+        width: 2rem;
+        height: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0.5rem;
+        transition: all 0.2s;
+    }
+
+    .modal-close:hover {
+        background: rgba(239, 68, 68, 0.2);
+        color: #ef4444;
+    }
+
+    .modal-body {
+        padding: 1.5rem;
+        overflow-y: auto;
+        max-height: calc(80vh - 100px);
+    }
+</style>
+
+<script>
+    function showHistoryModal(id) {
+        document.getElementById('modal-' + id).style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeHistoryModal(id) {
+        document.getElementById('modal-' + id).style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    // Close modal on ESC key
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.history-modal').forEach(modal => {
+                modal.style.display = 'none';
+            });
+            document.body.style.overflow = 'auto';
+        }
+    });
+</script>
 {% endblock %}

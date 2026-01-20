@@ -15,6 +15,7 @@ urlpatterns = [
     path('simular-ejecucion/', views.simular_ejecucion, name='simular_ejecucion'),
     # HTMX API
     path('api/load-children-classifiers/', views.load_children_classifiers, name='load_children_classifiers'),
+    path('history/', views.load_credit_history, name='load_credit_history'),
     
     # JSON API
     path('api/programs/create/', api_views.create_program, name='api_create_program'),

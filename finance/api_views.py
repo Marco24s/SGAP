@@ -6,7 +6,6 @@ from core.models import EstructuraProgramatica
 import json
 
 @require_POST
-@login_required
 def create_program(request):
     try:
         data = json.loads(request.body)

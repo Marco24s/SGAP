@@ -1,10 +1,12 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
 from .models import Credito, Asignacion
 from core.models import ClasificadorGasto, UnidadComponente, EstructuraProgramatica
 from django.contrib import messages
 from django.utils import timezone
 from .forms import CreditoForm
 
+@login_required
 def nuevo_credito(request):
     if request.method == "POST":
         form = CreditoForm(request.POST)
@@ -18,10 +20,105 @@ def nuevo_credito(request):
         form = CreditoForm()
     return render(request, 'finance/nuevo_credito.html', {'form': form})
 
+@login_required
 def lista_creditos(request):
-    creditos = Credito.objects.filter(estado='VIGENTE')
-    return render(request, 'finance/lista_creditos.html', {'creditos': creditos})
+    from collections import defaultdict
+    
+    def fmt_currency(value):
+        """Format currency as 1.000.000"""
+        return f"{value:,.0f}".replace(",", "X").replace(".", ",").replace("X", ".")
+    
+    creditos = Credito.objects.filter(estado='VIGENTE').select_related('programa', 'fuente').order_by('-fecha_creacion')
+    
+    # Group credits by (programa, anio, trimestre, fuente)
+    grupos = defaultdict(lambda: {'total': 0, 'creditos': []})
+    
+    for credito in creditos:
+        key = (credito.programa.id, credito.anio, credito.trimestre, credito.fuente.id)
+        grupos[key]['total'] += credito.monto_total
+        grupos[key]['creditos'].append({
+            'id': credito.id,
+            'monto': fmt_currency(credito.monto_total),
+            'monto_raw': credito.monto_total,
+            'fecha': credito.fecha_creacion.strftime('%d/%m/%Y %H:%M')
+        })
+        grupos[key]['programa'] = credito.programa
+        grupos[key]['anio'] = credito.anio
+        grupos[key]['trimestre'] = credito.trimestre
+        grupos[key]['fuente'] = credito.fuente
+    
+    # Convert to list for template
+    creditos_agrupados = []
+    for key, data in grupos.items():
+        creditos_agrupados.append({
+            'programa': data['programa'],
+            'anio': data['anio'],
+            'trimestre': data['trimestre'],
+            'fuente': data['fuente'],
+            'total': fmt_currency(data['total']),
+            'creditos': data['creditos'],
+            'count': len(data['creditos'])
+        })
+    
+    # Debug: print first group to verify formatting
+    if creditos_agrupados:
+        print("DEBUG - First group:", creditos_agrupados[0])
+    
+    return render(request, 'finance/lista_creditos_v2.html', {'creditos_agrupados': creditos_agrupados})
 
+@login_required
+def load_credit_history(request):
+    from collections import defaultdict
+    
+    programa_id = request.GET.get('programa')
+    anio = request.GET.get('anio')
+    trimestre = request.GET.get('trimestre')
+    fuente_id = request.GET.get('fuente')
+    
+    # Filter credits matching the criteria
+    creditos = Credito.objects.filter(
+        estado='VIGENTE',
+        programa_id=programa_id,
+        anio=anio,
+        trimestre=trimestre,
+        fuente_id=fuente_id
+    ).order_by('-fecha_creacion')
+
+    def fmt_currency(value):
+        return f"{value:,.0f}".replace(",", "X").replace(".", ",").replace("X", ".")
+    
+    creditos_data = []
+    total = 0
+    programa_nombre = ""
+    fuente_nombre = ""
+    
+    for credito in creditos:
+        # Capture names from first valid credit
+        if not programa_nombre:
+            programa_nombre = str(credito.programa)
+        if not fuente_nombre:
+            fuente_nombre = str(credito.fuente)
+            
+        total += credito.monto_total
+        creditos_data.append({
+            'id': credito.id,
+            'monto': fmt_currency(credito.monto_total),
+            'fecha': credito.fecha_creacion.strftime('%d/%m/%Y %H:%M')
+        })
+        
+    context = {
+        'creditos': creditos_data,
+        'program': programa_nombre, # passed as simple string to avoid template accessing complex objects if not needed
+        'programa': programa_nombre,
+        'anio': anio,
+        'trimestre': trimestre,
+        'fuente': fuente_nombre,
+        'total': fmt_currency(total)
+    }
+    
+    return render(request, 'finance/partials/history_modal.html', context)
+
+@login_required
 def distribuir_credito(request, credito_id):
     credito = get_object_or_404(Credito, pk=credito_id)
     asignaciones = credito.asignaciones.all()
@@ -124,10 +221,12 @@ from django.db import transaction
 
 # ... existing views ...
 
+@login_required
 def lista_modificaciones(request):
     modificaciones = ModificacionPresupuestaria.objects.all().order_by('-fecha_solicitud')
     return render(request, 'finance/lista_modificaciones.html', {'modificaciones': modificaciones})
 
+@login_required
 def nueva_modificacion(request):
     if request.method == "POST":
         form = ModificacionForm(request.POST)
@@ -158,10 +257,12 @@ def nueva_modificacion(request):
 from .forms import AutorizacionCargoForm
 from .models import AutorizacionCargo
 
+@login_required
 def lista_autorizaciones(request):
     autorizaciones = AutorizacionCargo.objects.filter(activo=True)
     return render(request, 'finance/lista_autorizaciones.html', {'autorizaciones': autorizaciones})
 
+@login_required
 def nueva_autorizacion(request):
     if request.method == "POST":
         form = AutorizacionCargoForm(request.POST)
@@ -174,6 +275,7 @@ def nueva_autorizacion(request):
     return render(request, 'finance/nueva_autorizacion.html', {'form': form})
 
 from .models import Compromiso
+@login_required
 def simular_ejecucion(request):
     """
     Tool for AA.PP to simulate execution by UU.CC for testing purposes.

@@ -25,6 +25,12 @@
                 <a href="{% url 'finance:simular_ejecucion' %}" class="nav-item">Ejecución (Simulada)</a>
                 <a href="{% url 'dashboard:reporte_estado_mensual' %}" class="nav-item">Reportes</a>
             </nav>
+            <div style="margin-top: auto; padding: 1rem; border-top: 1px solid rgba(255,255,255,0.1);">
+                <div style="color: #94a3b8; font-size: 0.875rem; margin-bottom: 0.5rem;">
+                    👤 {{ user.username }}
+                </div>
+                <a href="{% url 'core:logout' %}" class="nav-item" style="color: #ef4444;">Cerrar Sesión</a>
+            </div>
         </aside>
 
         <main class="content-area">
