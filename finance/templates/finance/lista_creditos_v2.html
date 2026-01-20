@@ -23,20 +23,13 @@
             {% for grupo in creditos_agrupados %}
             <tr>
                 <td>{{ grupo.programa }}</td>
-                <td>{{ grupo.anio }} - T{{ grupo.trimestre }}</td>
+                <td>{{ grupo.anio|stringformat:"d" }} - T{{ grupo.trimestre }}</td>
                 <td>{{ grupo.fuente }}</td>
                 <td>
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
                         <strong>${{ grupo.total }}</strong>
-                        {% if grupo.count > 1 %}
-                        <button
-                            hx-get="{% url 'finance:load_credit_history' %}?programa={{ grupo.programa.id }}&anio={{ grupo.anio|stringformat:'d' }}&trimestre={{ grupo.trimestre }}&fuente={{ grupo.fuente.id }}"
-                            hx-target="#modal-container" hx-swap="innerHTML"
-                            style="background: none; border: none; cursor: pointer; font-size: 1.2rem; color: #3b82f6; padding: 0.25rem 0.5rem; transition: transform 0.2s;"
-                            onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'"
-                            title="Ver historial ({{ grupo.count }} créditos)">📋</button>
-                        {% endif %}
                     </div>
+
                 </td>
                 <td>
                     {% if grupo.count == 1 %}
@@ -44,7 +37,7 @@
                         class="btn btn-primary">Gestionar</a>
                     {% else %}
                     <button class="btn btn-primary"
-                        hx-get="{% url 'finance:load_credit_history' %}?programa={{ grupo.programa.id }}&anio={{ grupo.anio|stringformat:'d' }}&trimestre={{ grupo.trimestre }}&fuente={{ grupo.fuente.id }}"
+                        hx-get="{% url 'finance:load_credit_history' %}?programa={{ grupo.programa.id }}&anio={{ grupo.anio|stringformat:'d' }}&trimestre={{ grupo.trimestre }}&fuente={{ grupo.fuente.id }}&v=1"
                         hx-target="#modal-container" hx-swap="innerHTML">Ver Opciones</button>
                     {% endif %}
                 </td>

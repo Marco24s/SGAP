@@ -113,8 +113,9 @@ def load_credit_history(request):
         'anio': anio,
         'trimestre': trimestre,
         'fuente': fuente_nombre,
-        'total': fmt_currency(total)
+        'final_total_display': fmt_currency(total)
     }
+    print("DEBUG: Sending final_total_display:", context['final_total_display'])
     
     return render(request, 'finance/partials/history_modal.html', context)
 
