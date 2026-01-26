@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Autorizaciones de Cargo (Cross-Charging){% endblock %}
+
+{% block content %}
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <p style="margin: 0; color: var(--text-muted);">Unidades externas autorizadas a imputar sobre cuentas propias.
+        </p>
+        <a href="{% url 'finance:nueva_autorizacion' %}" class="btn btn-primary">+ Nueva Autorización</a>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Origen (Paga)</th>
+                <th>Autorizado (Gasta)</th>
+                <th>Concepto</th>
+                <th>Límite</th>
+                <th>Vencimiento</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for a in autorizaciones %}
+            <tr>
+                <td>{{ a.unidad_origen.codigo }} ({{ a.unidad_origen.sigla }})</td>
+                <td>
+                    <span style="font-weight: 600; color: var(--accent);">{{ a.unidad_autorizada.codigo }} ({{
+                        a.unidad_autorizada.sigla }})</span>
+                </td>
+                <td>{{ a.clasificador.descripcion }}</td>
+                <td>${{ a.monto_maximo }}</td>
+                <td>{{ a.vencimiento|date:"d/m/Y" }}</td>
+                <td>
+                    {% if a.activo %}
+                    <span style="color: var(--success);">Activo</span>
+                    {% else %}
+                    <span style="color: var(--text-muted);">Inactivo</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" style="text-align: center; padding: 2rem;">No hay autorizaciones activas.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

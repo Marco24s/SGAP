@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>S.G.A.P. - Armada Argentina</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/style.css?v=4">
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
 </head>
 
@@ -25,19 +25,22 @@
                 <a href="{% url 'finance:simular_ejecucion' %}" class="nav-item">Ejecución (Simulada)</a>
                 <a href="{% url 'dashboard:reporte_estado_mensual' %}" class="nav-item">Reportes</a>
             </nav>
-            <div style="margin-top: auto; padding: 1rem; border-top: 1px solid rgba(255,255,255,0.1);">
-                <div style="color: #94a3b8; font-size: 0.875rem; margin-bottom: 0.5rem;">
-                    👤 {{ user.username }}
-                </div>
-                <a href="{% url 'core:logout' %}" class="nav-item" style="color: #ef4444;">Cerrar Sesión</a>
-            </div>
+            <!-- Sidebar footer removed -->
         </aside>
 
         <main class="content-area">
             <header class="top-bar">
-                <h1>{% block page_title %}Panel de Control{% endblock %}</h1>
+                <div class="header-title">
+                    <h1>
+                        <span style="color: var(--primary-blue);">✈</span>
+                        Sistema Integral de Gestión
+                    </h1>
+                </div>
                 <div class="user-profile">
-                    <span>AA.PP. Generico</span>
+                    <a href="{% url 'core:landing' %}" class="btn"
+                        style="background-color: var(--primary-blue); color: white;">
+                        <span>↩</span> Volver al Inicio
+                    </a>
                 </div>
             </header>
 

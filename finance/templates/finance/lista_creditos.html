@@ -57,24 +57,26 @@
                                 </div>
                                 <table style="width: 100%; border-collapse: collapse;">
                                     <thead>
-                                        <tr style="border-bottom: 2px solid #334155;">
+                                        <tr style="border-bottom: 2px solid var(--border-light);">
                                             <th
-                                                style="text-align: left; padding: 0.75rem; color: #94a3b8; font-weight: 500;">
+                                                style="text-align: left; padding: 0.75rem; color: var(--text-muted); font-weight: 600;">
                                                 Monto</th>
                                             <th
-                                                style="text-align: left; padding: 0.75rem; color: #94a3b8; font-weight: 500;">
+                                                style="text-align: left; padding: 0.75rem; color: var(--text-muted); font-weight: 600;">
                                                 Fecha de Creación</th>
                                             <th
-                                                style="text-align: right; padding: 0.75rem; color: #94a3b8; font-weight: 500;">
+                                                style="text-align: right; padding: 0.75rem; color: var(--text-muted); font-weight: 600;">
                                                 Acción</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {% for credito in grupo.creditos %}
-                                        <tr style="border-bottom: 1px solid #334155;">
-                                            <td style="padding: 0.75rem; font-weight: 600; color: #3b82f6;">${{
+                                        <tr style="border-bottom: 1px solid var(--border-light);">
+                                            <td style="padding: 0.75rem; font-weight: 600; color: var(--primary-blue);">
+                                                ${{
                                                 credito.monto }}</td>
-                                            <td style="padding: 0.75rem; color: #cbd5e1;">{{ credito.fecha }}</td>
+                                            <td style="padding: 0.75rem; color: var(--text-main);">{{ credito.fecha }}
+                                            </td>
                                             <td style="padding: 0.75rem; text-align: right;">
                                                 <a href="{% url 'finance:distribuir_credito' credito.id %}"
                                                     class="btn btn-primary"
@@ -84,10 +86,11 @@
                                         {% endfor %}
                                     </tbody>
                                     <tfoot>
-                                        <tr style="border-top: 2px solid #334155;">
-                                            <td style="padding: 0.75rem; font-weight: 700; color: white;">Total:</td>
+                                        <tr style="border-top: 2px solid var(--border-light);">
+                                            <td style="padding: 0.75rem; font-weight: 700; color: var(--text-main);">
+                                                Total:</td>
                                             <td colspan="2"
-                                                style="padding: 0.75rem; font-weight: 700; color: #3b82f6; font-size: 1.125rem;">
+                                                style="padding: 0.75rem; font-weight: 700; color: var(--primary-blue); font-size: 1.125rem;">
                                                 ${{ grupo.total }}</td>
                                         </tr>
                                     </tfoot>
@@ -131,20 +134,21 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0, 0, 0, 0.7);
+        background: rgba(0, 0, 0, 0.5);
         backdrop-filter: blur(4px);
     }
 
     .modal-content {
         position: relative;
-        background: #1e293b;
+        background: var(--bg-card);
         border-radius: 1rem;
         max-width: 800px;
         width: 90%;
         max-height: 80vh;
         overflow: hidden;
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
         animation: modalSlideIn 0.3s ease-out;
+        color: var(--text-main);
     }
 
     @keyframes modalSlideIn {
@@ -164,20 +168,20 @@
         justify-content: space-between;
         align-items: center;
         padding: 1.5rem;
-        border-bottom: 1px solid #334155;
+        border-bottom: 1px solid var(--border-light);
     }
 
     .modal-header h3 {
         margin: 0;
         font-size: 1.5rem;
-        color: white;
+        color: var(--text-main);
     }
 
     .modal-close {
         background: none;
         border: none;
         font-size: 2rem;
-        color: #94a3b8;
+        color: var(--text-muted);
         cursor: pointer;
         padding: 0;
         width: 2rem;
@@ -190,8 +194,8 @@
     }
 
     .modal-close:hover {
-        background: rgba(239, 68, 68, 0.2);
-        color: #ef4444;
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--danger);
     }
 
     .modal-body {

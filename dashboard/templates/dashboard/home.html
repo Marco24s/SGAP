@@ -1,109 +1,149 @@
 {% extends 'base.html' %}
 {% load humanize %}
 
-{% block page_title %}Dashboard de Gestión{% endblock %}
+{% block page_title %}Panel de Control{% endblock %}
 
 {% block content %}
-<div class="card">
-    <h3>Bienvenido, Administrador de Programa</h3>
-    <p>Resumen de Estado Financiero</p>
-
-    <div
-        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
-        <div style="background: rgba(59, 130, 246, 0.1); padding: 1rem; border-radius: 0.5rem; text-align: center;">
-            <div style="color: var(--primary); font-size: 2rem; font-weight: bold;">${{
-                total_presupuesto|default:"0"|floatformat:0|intcomma }}</div>
-            <div style="color: var(--text-muted); font-size: 0.9rem;">Techo Presupuestario</div>
-        </div>
-        <div style="background: rgba(16, 185, 129, 0.1); padding: 1rem; border-radius: 0.5rem; text-align: center;">
-            <div style="color: var(--success); font-size: 2rem; font-weight: bold;">${{
-                total_asignado|default:"0"|floatformat:0|intcomma }}</div>
-            <div style="color: var(--text-muted); font-size: 0.9rem;">Distribuido</div>
-        </div>
-        <div style="background: rgba(245, 158, 11, 0.1); padding: 1rem; border-radius: 0.5rem; text-align: center;">
-            <div style="color: #f59e0b; font-size: 2rem; font-weight: bold;">${{
-                total_ejecutado|default:"0"|floatformat:0|intcomma }}</div>
-            <div style="color: var(--text-muted); font-size: 0.9rem;">Ejecutado ({{ porcentaje_global|default:"0" }}%)
-            </div>
-        </div>
+<!-- Hero Section -->
+<div class="hero-banner">
+    <div class="hero-content">
+        <div class="hero-subtitle">Bienvenido</div>
+        <h2 class="hero-title">Panel de Control</h2>
+        <p class="hero-text">
+            Acceda a las herramientas de gestión presupuestaria, control de ejecución y administración de créditos desde
+            un único punto.
+        </p>
+    </div>
+    <div class="hero-icon">
+        STACK <!-- Placeholder for icon font or SVG if needed, using text for now or simple unicode -->
     </div>
 </div>
 
-<div class="card">
-    <h3>Semáforo de Ejecución (Por Unidad)</h3>
-    {% if unidades_stats %}
-    <table>
-        <thead>
-            <tr>
-                <th>Unidad Componente</th>
-                <th>Crédito Recibido</th>
-                <th>Comprometido</th>
-                <th>% Ejecución</th>
-                <th>Estado</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for u in unidades_stats %}
-            <tr>
-                <td>{{ u.unidad.codigo }} - {{ u.unidad.nombre }}</td>
-                <td>${{ u.asignado|floatformat:0|intcomma }}</td>
-                <td>${{ u.ejecutado|floatformat:0|intcomma }}</td>
-                <td>
-                    <div style="width: 100%; background: #334155; border-radius: 4px; height: 8px;">
-                        <div
-                            style="width: {{ u.porcentaje }}%; background: {% if u.color == 'danger' %}#ef4444{% elif u.color == 'warning' %}#f59e0b{% else %}#10b981{% endif %}; height: 100%; border-radius: 4px;">
-                        </div>
-                    </div>
-                    <small>{{ u.porcentaje }}%</small>
-                </td>
-                <td>
-                    {% if u.color == 'danger' %}
-                    <span style="color: #ef4444;">⚠ Crítico</span>
-                    {% elif u.color == 'warning' %}
-                    <span style="color: #f59e0b;">⚠ Subejecución</span>
-                    {% else %}
-                    <span style="color: #10b981;">Normal</span>
-                    {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-    <p style="padding: 1rem; color: var(--text-muted);">No hay distribución realizada aún.</p>
-    {% endif %}
+<!-- Financial Summary Cards (Styled like the reference image's 3 cards) -->
+<div class="stats-grid" style="margin-bottom: 2rem;">
+    <!-- Techo Presupuestario -->
+    <div class="stat-card">
+        <div class="stat-icon" style="background-color: rgba(59, 130, 246, 0.1); color: var(--primary-blue);">
+            💰
+        </div>
+        <div class="stat-value">${{ total_presupuesto|default:"0"|floatformat:0|intcomma }}</div>
+        <div class="stat-label">Techo Presupuestario</div>
+    </div>
+
+    <!-- Distribuido -->
+    <div class="stat-card">
+        <div class="stat-icon" style="background-color: rgba(16, 185, 129, 0.1); color: var(--success);">
+            📊
+        </div>
+        <div class="stat-value">${{ total_asignado|default:"0"|floatformat:0|intcomma }}</div>
+        <div class="stat-label">Crédito Distribuido</div>
+    </div>
+
+    <!-- Ejecutado -->
+    <div class="stat-card">
+        <div class="stat-icon" style="background-color: rgba(245, 158, 11, 0.1); color: var(--warning);">
+            📈
+        </div>
+        <div class="stat-value">${{ total_ejecutado|default:"0"|floatformat:0|intcomma }}</div>
+        <div class="stat-label">Ejecutado ({{ porcentaje_global|default:"0" }}%)</div>
+    </div>
 </div>
 
-<div class="card">
-    <h3>Mis Créditos (Bolsas a Distribuir)</h3>
-    {% if creditos %}
-    <table>
-        <thead>
-            <tr>
-                <th>Programa</th>
-                <th>Año-Trim</th>
-                <th>Fuente</th>
-                <th>Monto Total</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for c in creditos %}
-            <tr>
-                <td>{{ c.programa }}</td>
-                <td>{{ c.anio }} - T{{ c.trimestre }}</td>
-                <td>{{ c.fuente }}</td>
-                <td>${{ c.monto_total|floatformat:0|intcomma }}</td>
-                <td>
-                    <a href="{% url 'finance:distribuir_credito' c.id %}" class="btn btn-primary"
-                        style="text-decoration: none;">Gestionar</a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-    <p>No tiene créditos vigentes asignados.</p>
-    {% endif %}
+<div style="display: grid; grid-template-columns: 1fr; gap: 1.5rem;">
+    <!-- Semáforo Section -->
+    <div class="card">
+        <h3>Semáforo de Ejecución (Por Unidad)</h3>
+        {% if unidades_stats %}
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Unidad Componente</th>
+                        <th>Crédito Recibido</th>
+                        <th>Comprometido</th>
+                        <th>% Ejecución</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in unidades_stats %}
+                    <tr>
+                        <td style="font-weight: 500; color: var(--text-main);">{{ u.unidad.codigo }} - {{
+                            u.unidad.nombre }}</td>
+                        <td>${{ u.asignado|floatformat:0|intcomma }}</td>
+                        <td>${{ u.ejecutado|floatformat:0|intcomma }}</td>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <div
+                                    style="flex: 1; background: #e2e8f0; border-radius: 4px; height: 6px; min-width: 60px;">
+                                    <div
+                                        style="width: {{ u.porcentaje }}%; background-color: {% if u.color == 'danger' %}var(--danger){% elif u.color == 'warning' %}var(--warning){% else %}var(--success){% endif %}; height: 100%; border-radius: 4px;">
+                                    </div>
+                                </div>
+                                <span style="font-size: 0.75rem; color: var(--text-muted);">{{ u.porcentaje }}%</span>
+                            </div>
+                        </td>
+                        <td>
+                            {% if u.color == 'danger' %}
+                            <span style="color: var(--danger); font-weight: 500;">⚠ Crítico</span>
+                            {% elif u.color == 'warning' %}
+                            <span style="color: var(--warning); font-weight: 500;">⚠ Subejecución</span>
+                            {% else %}
+                            <span style="color: var(--success); font-weight: 500;">Normal</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p style="padding: 1rem; color: var(--text-muted); text-align: center;">No hay distribución realizada aún.</p>
+        {% endif %}
+    </div>
+
+    <!-- Creditos Section -->
+    <div class="card">
+        <h3>Mis Créditos (Bolsas a Distribuir)</h3>
+        {% if creditos %}
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Programa</th>
+                        <th>Año-Trim</th>
+                        <th>Fuente</th>
+                        <th>Monto Total</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in creditos %}
+                    <tr>
+                        <td style="font-weight: 500;">{{ c.programa }}</td>
+                        <td>{{ c.anio }} - T{{ c.trimestre }}</td>
+                        <td>
+                            <span
+                                style="background: var(--bg-body); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; color: var(--text-muted);">
+                                {{ c.fuente }}
+                            </span>
+                        </td>
+                        <td style="font-weight: 600;">${{ c.monto_total|floatformat:0|intcomma }}</td>
+                        <td>
+                            <a href="{% url 'finance:distribuir_credito' c.id %}" class="btn btn-primary">
+                                Gestionar
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 2rem;">
+            <p style="color: var(--text-muted);">No tiene créditos vigentes asignados.</p>
+        </div>
+        {% endif %}
+    </div>
 </div>
 {% endblock %}

@@ -36,11 +36,13 @@
                 <td>${{ m.monto }}</td>
                 <td>
                     {% if m.estado == 'APROBADO' %}
-                        <span style="color: var(--success); background: rgba(16, 185, 129, 0.1); padding: 2px 8px; border-radius: 4px;">Aprobado</span>
+                    <span
+                        style="color: var(--success); background: rgba(16, 185, 129, 0.1); padding: 2px 8px; border-radius: 4px;">Aprobado</span>
                     {% elif m.estado == 'PENDIENTE' %}
-                        <span style="color: #facc15; background: rgba(250, 204, 21, 0.1); padding: 2px 8px; border-radius: 4px;">Pendiente</span>
+                    <span
+                        style="color: var(--warning); background: rgba(245, 158, 11, 0.1); padding: 2px 8px; border-radius: 4px;">Pendiente</span>
                     {% else %}
-                        <span>{{ m.estado }}</span>
+                    <span>{{ m.estado }}</span>
                     {% endif %}
                 </td>
             </tr>

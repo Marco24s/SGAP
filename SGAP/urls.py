@@ -19,7 +19,7 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('core.urls')),
-    path('', include('dashboard.urls')),
+    path('', include('core.urls')), # This will now delegate to core.urls, which we need to update to handle ''
+    path('dashboard/', include('dashboard.urls')), # MOVED dashboard to explicit path
     path('finance/', include('finance.urls')),
 ]

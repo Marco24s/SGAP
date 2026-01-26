@@ -61,20 +61,20 @@ def home(request):
 
     context = {
         'creditos': creditos_vigentes,
-        # Formatting directly in Python to avoid template issues
-        'total_presupuesto': fmt(total_presupuesto),
-        'total_asignado': fmt(total_asignado),
-        'total_ejecutado': fmt(total_ejecutado),
+        # Formatting handled in template (home.html)
+        'total_presupuesto': total_presupuesto,
+        'total_asignado': total_asignado,
+        'total_ejecutado': total_ejecutado,
         'porcentaje_global': round(porcentaje_global, 1),
         'unidades_stats': [
             {
                 'unidad': u['unidad'],
-                'asignado': fmt(u['asignado']),
-                'ejecutado': fmt(u['ejecutado']),
+                'asignado': u['asignado'],
+                'ejecutado': u['ejecutado'],
                 'porcentaje': u['porcentaje'],
                 'color': u['color'],
                 'label': u['label']
             } for u in unidades_stats
         ]
     }
-    return render(request, 'dashboard/home_new.html', context)
+    return render(request, 'dashboard/home.html', context)
