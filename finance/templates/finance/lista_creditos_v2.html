@@ -9,23 +9,58 @@
         <a href="{% url 'finance:nuevo_credito' %}" class="btn btn-primary">+ Recepcionar Crédito</a>
     </div>
 
+    <!-- Grouping Controls -->
+    <div style="margin-bottom: 1.5rem; display: flex; gap: 0.5rem; align-items: center;">
+        <span style="font-size: 0.9rem; color: var(--text-muted); margin-right: 0.5rem;">Agrupar por:</span>
+        <a href="?group_by=default"
+            class="btn {% if group_by == 'default' %}btn-primary{% else %}btn-secondary{% endif %}"
+            style="padding: 0.25rem 0.75rem; font-size: 0.85rem; border: 1px solid var(--border-light);">Detallado</a>
+        <a href="?group_by=ff" class="btn {% if group_by == 'ff' %}btn-primary{% else %}btn-secondary{% endif %}"
+            style="padding: 0.25rem 0.75rem; font-size: 0.85rem; border: 1px solid var(--border-light);">Fuente (FF)</a>
+        <a href="?group_by=programa"
+            class="btn {% if group_by == 'programa' %}btn-primary{% else %}btn-secondary{% endif %}"
+            style="padding: 0.25rem 0.75rem; font-size: 0.85rem; border: 1px solid var(--border-light);">Programa</a>
+        <a href="?group_by=inciso"
+            class="btn {% if group_by == 'inciso' %}btn-primary{% else %}btn-secondary{% endif %}"
+            style="padding: 0.25rem 0.75rem; font-size: 0.85rem; border: 1px solid var(--border-light);">Inciso</a>
+
+        <div style="margin-left: auto; font-weight: 700; color: var(--text-main);">
+            Total Global: <span style="color: var(--primary-blue);">${{ grand_total }}</span>
+        </div>
+    </div>
+
     <table>
         <thead>
             <tr>
+                {% if group_by == 'default' %}
                 <th>FF</th>
+                <th>Inciso</th>
                 <th>Programa</th>
                 <th>Periodo</th>
                 <th>Cuota</th>
                 <th>Total (Techo)</th>
                 <th></th>
+                {% elif group_by == 'ff' %}
+                <th>Fuente de Financiamiento</th>
+                <th>Total Acumulado</th>
+                {% elif group_by == 'programa' %}
+                <th>Programa Presupuestario</th>
+                <th>Total Acumulado</th>
+                {% elif group_by == 'inciso' %}
+                <th>Inciso / Partida</th>
+                <th>Total Acumulado</th>
+                {% endif %}
             </tr>
         </thead>
         <tbody>
+            {% load l10n %}
             {% for grupo in creditos_agrupados %}
             <tr>
+                {% if group_by == 'default' %}
                 <td>FF{{ grupo.fuente.codigo }}</td>
+                <td>{{ grupo.inciso }}</td>
                 <td>{{ grupo.programa }}</td>
-                <td>{{ grupo.anio|stringformat:"d" }} - T{{ grupo.trimestre }}</td>
+                <td>{{ grupo.anio|unlocalize }} - T{{ grupo.trimestre }}</td>
                 <td>
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
                         <strong style="color: var(--success);">${{ grupo.cuota }}</strong>
@@ -35,7 +70,6 @@
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
                         <strong>${{ grupo.total }}</strong>
                     </div>
-
                 </td>
                 <td>
                     <div style="display: flex; align-items: center; gap: 0.5rem; justify-content: flex-end;">
@@ -68,11 +102,21 @@
                             style="padding: 0.25rem 0.75rem; font-size: 0.875rem;">Gestionar</a>
                         {% else %}
                         <button class="btn btn-primary" style="padding: 0.25rem 0.75rem; font-size: 0.875rem;"
-                            hx-get="{% url 'finance:load_credit_history' %}?programa={{ grupo.programa.id }}&anio={{ grupo.anio|stringformat:'d' }}&trimestre={{ grupo.trimestre }}&fuente={{ grupo.fuente.id }}&v=1"
+                            hx-get="{% url 'finance:load_credit_history' %}?programa={{ grupo.programa.id }}&anio={{ grupo.anio }}&trimestre={{ grupo.trimestre }}&fuente={{ grupo.fuente.id }}&inciso={{ grupo.inciso }}&v=1"
                             hx-target="#modal-container" hx-swap="innerHTML">Ver Opciones</button>
                         {% endif %}
                     </div>
                 </td>
+                {% elif group_by == 'ff' %}
+                <td style="font-weight: 600;">{{ grupo.fuente }}</td>
+                <td style="font-weight: 700; color: var(--primary-blue); font-size: 1.1rem;">${{ grupo.total }}</td>
+                {% elif group_by == 'programa' %}
+                <td style="font-weight: 600;">{{ grupo.programa }}</td>
+                <td style="font-weight: 700; color: var(--primary-blue); font-size: 1.1rem;">${{ grupo.total }}</td>
+                {% elif group_by == 'inciso' %}
+                <td style="font-weight: 600;">Inciso {{ grupo.inciso }}</td>
+                <td style="font-weight: 700; color: var(--primary-blue); font-size: 1.1rem;">${{ grupo.total }}</td>
+                {% endif %}
             </tr>
             {% endfor %}
         </tbody>

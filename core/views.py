@@ -66,8 +66,8 @@ def control_view(request):
 
 # --- Vistas CRUD para Control ---
 
-from .forms import IncisoControlForm, GastoOperativoForm
-from .models import IncisoControl, GastoOperativo, HistorialInciso
+from .forms import IncisoControlForm, GastoOperativoForm, UnidadComponenteForm
+from .models import IncisoControl, GastoOperativo, HistorialInciso, UnidadComponente
 
 
 @login_required
@@ -182,5 +182,25 @@ def gasto_edit(request, pk):
         form = GastoOperativoForm(instance=gasto)
     return render(request, 'core/form_base.html', {'form': form, 'title': 'Editar Gasto Operativo'})
 
-def control_placeholder_view(request):
     return render(request, 'core/control_placeholder.html')
+
+from .forms import UnidadComponenteForm
+from .models import UnidadComponente
+
+@login_required
+def create_uucc(request):
+    if request.method == "POST":
+        form = UnidadComponenteForm(request.POST)
+        if form.is_valid():
+            uucc = form.save()
+            
+            # If HTMX request, return the updated Select Options OOB and close modal
+            if request.headers.get('HX-Request'):
+                uuccs = UnidadComponente.objects.all().order_by('codigo')
+                return render(request, 'core/partials/uucc_created_response.html', {'uuccs': uuccs})
+                
+            return redirect('finance:distribuir_credito') # Fallback
+    else:
+        form = UnidadComponenteForm()
+    
+    return render(request, 'core/partials/create_uucc_modal.html', {'form': form})

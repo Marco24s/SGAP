@@ -1,0 +1,12 @@
+<!-- Close Modal -->
+<div id="modal-container"></div>
+
+<!-- Swap select options -->
+<select id="uucc-select" name="uucc" class="form-input" style="width: 100%; max-width: 600px;" required
+    hx-swap-oob="true">
+    <option value="">Seleccione UU.CC...</option>
+    {% for u in uuccs %}
+    <option value="{{ u.id }}" {% if forloop.last %}selected{% endif %}>{{ u.codigo }} ({{ u.sigla }}) - {{ u.nombre }}
+    </option>
+    {% endfor %}
+</select>

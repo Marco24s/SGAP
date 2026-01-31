@@ -45,6 +45,20 @@
             </header>
 
             <div class="content-wrapper">
+                {% if messages %}
+                <div class="messages-container" style="margin-bottom: 1.5rem;">
+                    {% for message in messages %}
+                    <div class="alert"
+                        style="padding: 1rem; border-radius: 0.5rem; margin-bottom: 0.5rem; border: 1px solid;
+                                {% if message.tags == 'success' %}background: rgba(16, 185, 129, 0.1); color: var(--success); border-color: var(--success);{% endif %}
+                                {% if message.tags == 'error' %}background: rgba(239, 68, 68, 0.1); color: var(--danger); border-color: var(--danger);{% endif %}
+                                {% if message.tags == 'warning' %}background: rgba(245, 158, 11, 0.1); color: var(--warning); border-color: var(--warning);{% endif %}">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
                 {% block content %}
                 {% endblock %}
             </div>

@@ -1,0 +1,41 @@
+<div class="history-modal">
+    <div class="modal-overlay" _="on click or keyup[key='Escape'] trigger closeModal"></div>
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Nueva Unidad Componente</h3>
+            <button class="modal-close" onclick="document.getElementById('modal-container').innerHTML=''">×</button>
+        </div>
+        <div class="modal-body">
+            <form hx-post="{% url 'core:create_uucc' %}" hx-target="#modal-container" hx-swap="innerHTML">
+                {% csrf_token %}
+
+                <div style="display: grid; gap: 1rem; margin-bottom: 2rem;">
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Código
+                            (SAF/UUCC)</label>
+                        {{ form.codigo }}
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Sigla</label>
+                        {{ form.sigla }}
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Nombre Completo</label>
+                        {{ form.nombre }}
+                    </div>
+                    {% if form.errors %}
+                    <div style="color: red; font-size: 0.9rem;">
+                        {{ form.errors }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 1rem;">
+                    <button type="button" class="btn btn-secondary"
+                        onclick="document.getElementById('modal-container').innerHTML=''">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar Unidad</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

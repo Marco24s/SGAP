@@ -8,7 +8,19 @@ from django.db.models import Sum, F
 def home(request):
     # 1. Global Summaries
     creditos_vigentes = Credito.objects.filter(estado='VIGENTE')
-    total_presupuesto = creditos_vigentes.aggregate(Sum('monto_total'))['monto_total__sum'] or 0
+    
+    # 1. Global Summaries (Fixed to avoid dupes on Annual Ceiling)
+    creditos_vigentes = Credito.objects.filter(estado='VIGENTE')
+    
+    # Calculate Total Budget ignoring duplicate Quotas for same Program/Inciso/Year
+    total_presupuesto = 0
+    seen_budgets = set()
+    for c in creditos_vigentes:
+        # Key: Program, Source, Inciso, Year
+        key = (c.programa_id, c.fuente_id, c.inciso, c.anio)
+        if key not in seen_budgets:
+            total_presupuesto += c.monto_total
+            seen_budgets.add(key)
     
     # Total Distributed (Asignado)
     # We sum all assignments related to vigorous credits

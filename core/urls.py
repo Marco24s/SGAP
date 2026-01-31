@@ -17,4 +17,6 @@ urlpatterns = [
     path('control/inciso/editar/<int:pk>/', views.inciso_edit, name='inciso_edit'),
     path('control/gasto/nuevo/', views.gasto_create, name='gasto_create'),
     path('control/gasto/editar/<int:pk>/', views.gasto_edit, name='gasto_edit'),
+    # UUCC Quick Add
+    path('uucc/nuevo/', views.create_uucc, name='create_uucc'),
 ]

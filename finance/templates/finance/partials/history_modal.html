@@ -6,10 +6,12 @@
             <button onclick="closeHistoryModal()" class="modal-close">&times;</button>
         </div>
         <div class="modal-body">
+            {% load l10n %}
             <div
                 style="margin-bottom: 1rem; padding: 0.75rem; background: rgba(59, 130, 246, 0.1); border-radius: 0.5rem;">
                 <strong>{{ programa }}</strong><br>
-                <span style="color: #94a3b8; font-size: 0.875rem;">{{ anio }} - T{{ trimestre }} | {{ fuente }}</span>
+                <span style="color: #94a3b8; font-size: 0.875rem;">{{ anio|unlocalize }} - T{{ trimestre }} | {{ fuente
+                    }}</span>
             </div>
             <table style="width: 100%; border-collapse: collapse;">
                 <thead>

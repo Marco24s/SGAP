@@ -53,13 +53,35 @@ def lista_creditos(request):
     
     creditos = Credito.objects.filter(estado='VIGENTE').select_related('programa', 'fuente').order_by('-fecha_creacion')
     
-    # Group credits by (programa, anio, trimestre, fuente)
-    grupos = defaultdict(lambda: {'total': 0, 'cuota': 0, 'creditos': []})
+    # Check grouping mode
+    group_by = request.GET.get('group_by', 'default')
+    
+    # Group credits
+    # Structure: {'total': 0, 'cuota': 0, 'creditos': [], 'seen_budgets': set()}
+    # seen_budgets tracks (programa, fuente, inciso, anio) to avoid double counting Annual Totals
+    grupos = defaultdict(lambda: {'total': 0, 'cuota': 0, 'creditos': [], 'seen_budgets': set()})
     
     for credito in creditos:
-        key = (credito.programa.id, credito.anio, credito.trimestre, credito.fuente.id)
-        grupos[key]['total'] += credito.monto_total
+        if group_by == 'ff':
+            key = (credito.fuente.id,)
+        elif group_by == 'programa':
+            key = (credito.programa.id,)
+        elif group_by == 'inciso':
+            key = (credito.inciso,)
+        else: # default
+            key = (credito.programa.id, credito.anio, credito.trimestre, credito.fuente.id, credito.inciso)
+            
+        # Unique identifier for the "Annual Budget Line"
+        budget_key = (credito.programa.id, credito.fuente.id, credito.inciso, credito.anio)
+        
+        # Only add to TOTAL if this budget line hasn't been counted for this group yet
+        if budget_key not in grupos[key]['seen_budgets']:
+            grupos[key]['total'] += credito.monto_total
+            grupos[key]['seen_budgets'].add(budget_key)
+            
+        # Always add to CUOTA (since that's cumulative cash released)
         grupos[key]['cuota'] += credito.monto_cuota
+        
         grupos[key]['creditos'].append({
             'id': credito.id,
             'monto': fmt_currency(credito.monto_total),
@@ -67,30 +89,76 @@ def lista_creditos(request):
             'monto_raw': credito.monto_total,
             'fecha': credito.fecha_creacion.strftime('%d/%m/%Y %H:%M')
         })
-        grupos[key]['programa'] = credito.programa
-        grupos[key]['anio'] = credito.anio
-        grupos[key]['trimestre'] = credito.trimestre
-        grupos[key]['fuente'] = credito.fuente
+        
+        # Populate representative data based on grouping
+        if group_by == 'ff':
+            grupos[key]['fuente'] = credito.fuente
+        elif group_by == 'programa':
+            grupos[key]['programa'] = credito.programa
+        elif group_by == 'inciso':
+            grupos[key]['inciso'] = credito.inciso
+        else:
+            grupos[key]['programa'] = credito.programa
+            grupos[key]['anio'] = credito.anio
+            grupos[key]['trimestre'] = credito.trimestre
+            grupos[key]['fuente'] = credito.fuente
+            grupos[key]['inciso'] = credito.inciso
     
     # Convert to list for template
     creditos_agrupados = []
     for key, data in grupos.items():
-        creditos_agrupados.append({
-            'programa': data['programa'],
-            'anio': data['anio'],
-            'trimestre': data['trimestre'],
-            'fuente': data['fuente'],
+        item = {
             'total': fmt_currency(data['total']),
             'cuota': fmt_currency(data['cuota']),
             'creditos': data['creditos'],
             'count': len(data['creditos'])
-        })
+        }
+        
+        # Fill specific fields based on mode
+        if group_by == 'ff':
+            item['fuente'] = data['fuente']
+        elif group_by == 'programa':
+            item['programa'] = data['programa']
+        elif group_by == 'inciso':
+            item['inciso'] = data['inciso']
+        else:
+            item['programa'] = data['programa']
+            item['anio'] = str(data['anio'])
+            item['trimestre'] = data['trimestre']
+            item['fuente'] = data['fuente']
+            item['inciso'] = data['inciso']
+            
+        creditos_agrupados.append(item)
     
-    # Debug: print first group to verify formatting
-    if creditos_agrupados:
-        print("DEBUG - First group:", creditos_agrupados[0])
+    # Sort Logic
+    if group_by == 'ff':
+        creditos_agrupados.sort(key=lambda x: str(x['fuente']))
+    elif group_by == 'programa':
+        creditos_agrupados.sort(key=lambda x: str(x['programa']))
+    elif group_by == 'inciso':
+        creditos_agrupados.sort(key=lambda x: x['inciso'])
+    else:
+        creditos_agrupados.sort(key=lambda x: (x['anio'], x['trimestre'], str(x['programa']), x['inciso']))
     
-    return render(request, 'finance/lista_creditos_v2.html', {'creditos_agrupados': creditos_agrupados})
+    # Calculate Grand Total for display
+    # Calculate Grand Total for display
+    # Logic: Sum 'monto_total' (Annual Ceiling) only ONCE per unique budget line (Program+Source+Inciso+Year)
+    grand_total = 0
+    seen_budgets_global = set()
+    
+    for credito in creditos:
+         budget_key = (credito.programa.id, credito.fuente.id, credito.inciso, credito.anio)
+         if budget_key not in seen_budgets_global:
+             grand_total += credito.monto_total
+             seen_budgets_global.add(budget_key)
+             
+    grand_total_display = fmt_currency(grand_total)
+
+    return render(request, 'finance/lista_creditos_v2.html', {
+        'creditos_agrupados': creditos_agrupados, 
+        'group_by': group_by,
+        'grand_total': grand_total_display
+    })
 
 @login_required
 def load_credit_history(request):
@@ -100,6 +168,7 @@ def load_credit_history(request):
     anio = request.GET.get('anio')
     trimestre = request.GET.get('trimestre')
     fuente_id = request.GET.get('fuente')
+    inciso = request.GET.get('inciso')
     
     # Filter credits matching the criteria
     creditos = Credito.objects.filter(
@@ -107,7 +176,9 @@ def load_credit_history(request):
         programa_id=programa_id,
         anio=anio,
         trimestre=trimestre,
-        fuente_id=fuente_id
+
+        fuente_id=fuente_id,
+        inciso=inciso
     ).order_by('-fecha_creacion')
 
     def fmt_currency(value):
@@ -138,7 +209,7 @@ def load_credit_history(request):
         'creditos': creditos_data,
         'program': programa_nombre, # passed as simple string to avoid template accessing complex objects if not needed
         'programa': programa_nombre,
-        'anio': anio,
+        'anio': str(anio) if anio else '',
         'trimestre': trimestre,
         'fuente': fuente_nombre,
         'final_total_display': fmt_currency(total)
@@ -162,53 +233,34 @@ def distribuir_credito(request, credito_id):
         try:
             uucc = UnidadComponente.objects.get(pk=uucc_id)
             
-            # Iterate over all POST keys to find allocations
-            # Expected format: amount_INCISOID, detail_INCISOID (optional)
-            for key, value in request.POST.items():
-                if key.startswith('monto_') and value:
-                    if key == 'monto_combined_23':
-                        continue
-                    inciso_id = key.split('_')[1]
-                    monto = float(value)
-                    
-                    # Logic:
-                    # 1. Check if 'detalle_INCISOID' exists
-                    selected_classifier_id = request.POST.get(f'detalle_{inciso_id}')
-                    if selected_classifier_id:
-                        clasificador = ClasificadorGasto.objects.get(pk=selected_classifier_id)
-                    else:
-                        clasificador = ClasificadorGasto.objects.get(pk=inciso_id)
-                        
-                    # Check Obstruction/Constraints (Inciso 4 requires Obra)
-                    obra_id = request.POST.get(f'obra_{inciso_id}')
-                    obra = None
-                    if obra_id:
-                        obra = EstructuraProgramatica.objects.get(pk=obra_id)
+            # Retrieve inputs
+            monto = float(request.POST.get('monto', 0))
+            if monto <= 0:
+                raise ValueError("El monto debe ser mayor a 0")
+                
+            # Determine Clasificador based on Credit
+            # Rule: We try to match the Credit's Inciso code to a ClasificadorGasto
+            clasificador = ClasificadorGasto.objects.filter(nivel=1, codigo=credito.inciso).first()
+            if not clasificador:
+                raise ValueError(f"No se encontró un Clasificador válido para el Inciso {credito.inciso}")
 
-                    # Create Asignacion
-                    Asignacion.objects.create(
-                        uucc=uucc,
-                        credito_origen=credito,
-                        clasificador_gasto=clasificador,
-                        monto=monto,
-                        trimestre=credito.trimestre, # Inherit from Credit
-                        obra=obra
-                    )
-            
-            # Special Handling for Combined 2 & 3
-            if request.POST.get('monto_combined_23'):
-                monto_23 = float(request.POST.get('monto_combined_23'))
-                # Assign to Inciso 2 (Bienes) as primary container for "Funcionamiento"
-                # Searching for Inciso 2 by code strictly
-                inciso_2 = ClasificadorGasto.objects.filter(nivel=1, codigo='2').first()
-                if inciso_2:
-                    Asignacion.objects.create(
-                        uucc=uucc,
-                        credito_origen=credito,
-                        clasificador_gasto=inciso_2,
-                        monto=monto_23,
-                        trimestre=credito.trimestre
-                    )
+            # Check Obstruction/Constraints (Inciso 4 requires Obra)
+            obra = None
+            if credito.inciso == '4':
+                obra_id = request.POST.get('obra')
+                if not obra_id:
+                     raise ValueError("Es obligatorio seleccionar una Obra para Inciso 4")
+                obra = EstructuraProgramatica.objects.get(pk=obra_id)
+
+            # Create Asignacion
+            Asignacion.objects.create(
+                uucc=uucc,
+                credito_origen=credito,
+                clasificador_gasto=clasificador,
+                monto=monto,
+                trimestre=credito.trimestre, # Inherit from Credit
+                obra=obra
+            )
             
             messages.success(request, f"Asignación registrada exitosamente para {uucc.codigo}.")
             return redirect('finance:distribuir_credito', credito_id=credito.id)

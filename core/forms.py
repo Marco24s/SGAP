@@ -1,5 +1,5 @@
 from django import forms
-from .models import IncisoControl, GastoOperativo
+from .models import IncisoControl, GastoOperativo, UnidadComponente
 
 class IncisoControlForm(forms.ModelForm):
     class Meta:
@@ -28,4 +28,15 @@ class GastoOperativoForm(forms.ModelForm):
             'concepto': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: Insumos de Limpieza'}),
             'importe_estimado': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
             'importe_real': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+        }
+
+class UnidadComponenteForm(forms.ModelForm):
+    class Meta:
+        model = UnidadComponente
+        fields = ['nombre', 'codigo', 'sigla', 'es_ejecutora']
+        widgets = {
+            'nombre': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Nombre de la Unidad'}),
+            'codigo': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Código (Ej: 111)'}),
+            'sigla': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Sigla (Ej: DGA)'}),
+            'es_ejecutora': forms.CheckboxInput(attrs={'class': 'form-checkbox'}),
         }

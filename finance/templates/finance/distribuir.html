@@ -26,9 +26,16 @@
 
         <!-- 1. Select Unit -->
         <div style="margin-bottom: 2rem;">
-            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">1. Seleccione Unidad Componente
-                (Beneficiario)</label>
-            <select name="uucc" class="form-input" style="width: 100%; max-width: 600px;" required>
+            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+                <label style="font-weight: 500; margin: 0;">1. Seleccione Unidad Componente (Beneficiario)</label>
+                <button type="button" class="btn btn-sm btn-secondary"
+                    style="padding: 0.2rem 0.6rem; font-size: 0.75rem;" hx-get="{% url 'core:create_uucc' %}"
+                    hx-target="#modal-container" hx-swap="innerHTML">
+                    + Agregar Nueva
+                </button>
+            </div>
+
+            <select id="uucc-select" name="uucc" class="form-input" style="width: 100%; max-width: 600px;" required>
                 <option value="">Seleccione UU.CC...</option>
                 {% for u in uuccs %}
                 <option value="{{ u.id }}">{{ u.codigo }} ({{ u.sigla }}) - {{ u.nombre }}</option>
@@ -36,73 +43,44 @@
             </select>
         </div>
 
+        <!-- ... -->
+
+
+
         <!-- 2. Select Incisos (Multi-row) -->
+        <!-- 2. Allocation Details -->
         <div style="margin-bottom: 2rem;">
-            <label style="display: block; margin-bottom: 1rem; font-weight: 500;">2. Seleccione las Partidas a Financiar
-                (Incisos)</label>
+            <label style="display: block; margin-bottom: 1rem; font-weight: 500;">2. Detalles de Asignación</label>
 
-            <div style="display: grid; gap: 1rem; max-width: 800px;">
-                {% for inciso in incisos %}
-                <div class="inciso-card"
-                    style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 6px; padding: 1rem;">
-                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
-                        <input type="checkbox" id="check_{{ inciso.id }}"
-                            onchange="document.getElementById('details_{{ inciso.id }}').style.display = this.checked ? 'grid' : 'none'"
-                            style="width: 1.2rem; height: 1.2rem; cursor: pointer;">
-                        <label for="check_{{ inciso.id }}" style="cursor: pointer; font-weight: 600; font-size: 1rem;">
-                            {{ inciso.codigo }} - {{ inciso.descripcion }}
-                        </label>
-                    </div>
+            <div
+                style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 6px; padding: 1.5rem; max-width: 600px;">
+                <div style="display: grid; gap: 1rem;">
 
-                    <div id="details_{{ inciso.id }}"
-                        style="display: none; grid-template-columns: 1fr auto; gap: 1rem; padding-left: 2.2rem; margin-top: 0.5rem;">
-
-                        <div style="display: grid; gap: 0.5rem;">
-
-                            {% if inciso.codigo == '1' %}
-                            <p style="font-size: 0.8rem; color: #f59e0b;">* Gastos en Personal (Se asignará a Partida
-                                Principal por defecto)</p>
-                            {% endif %}
-
-                            {% if inciso.codigo == '4' %}
-                            <label style="font-size: 0.85rem;">Asociar a Obra (Requerido)</label>
-                            <select name="obra_{{ inciso.id }}" class="form-input">
-                                <option value="">-- Sin Obra --</option>
-                                {% for obra in obras %}
-                                <option value="{{ obra.id }}">{{ obra.codigo }} - {{ obra.descripcion }}</option>
-                                {% endfor %}
-                            </select>
-                            {% endif %}
-
-                            <label style="font-size: 0.85rem;">Monto a Asignar</label>
-                            <input type="number" name="monto_{{ inciso.id }}" class="form-input" placeholder="$0.00"
-                                step="0.01">
+                    <div
+                        style="padding-bottom: 1rem; border-bottom: 1px solid var(--border-light); margin-bottom: 0.5rem;">
+                        <span style="color: var(--text-muted); font-size: 0.9rem;">Imputando a:</span>
+                        <div style="font-weight: 600; font-size: 1.1rem; color: var(--primary-blue);">
+                            Inciso {{ credito.inciso }}
+                            {% if credito.principal %}- Partida {{ credito.principal }}{% endif %}
                         </div>
                     </div>
-                </div>
-                {% endfor %}
 
-                <!-- Added 2+3 Combined Option -->
-                <div class="inciso-card"
-                    style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 6px; padding: 1rem;">
-                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
-                        <input type="checkbox" id="check_combined_23"
-                            onchange="document.getElementById('details_combined_23').style.display = this.checked ? 'grid' : 'none'"
-                            style="width: 1.2rem; height: 1.2rem; cursor: pointer;">
-                        <label for="check_combined_23" style="cursor: pointer; font-weight: 600; font-size: 1rem;">
-                            2 y 3 - Gastos de Funcionamiento (Bienes y Servicios)
-                        </label>
+                    {% if credito.inciso == '4' %}
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem;">Asociar a Obra
+                            (Requerido para Inciso 4)</label>
+                        <select name="obra" class="form-input" required>
+                            <option value="">-- Seleccione una Obra --</option>
+                            {% for obra in obras %}
+                            <option value="{{ obra.id }}">{{ obra.codigo }} - {{ obra.descripcion }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
+                    {% endif %}
 
-                    <div id="details_combined_23"
-                        style="display: none; grid-template-columns: 1fr auto; gap: 1rem; padding-left: 2.2rem; margin-top: 0.5rem;">
-                        <div style="display: grid; gap: 0.5rem;">
-                            <p style="font-size: 0.8rem; color: var(--text-muted);">* Se asignará el monto unificado a
-                                la partida de Bienes de Consumo (Inciso 2)</p>
-                            <label style="font-size: 0.85rem;">Monto Unificado a Asignar</label>
-                            <input type="number" name="monto_combined_23" class="form-input" placeholder="$0.00"
-                                step="0.01">
-                        </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem;">Monto a Asignar</label>
+                        <input type="number" name="monto" class="form-input" placeholder="$0.00" step="0.01" required>
                     </div>
                 </div>
             </div>
@@ -111,6 +89,64 @@
         <button type="submit" class="btn btn-primary" style="padding: 0.75rem 2rem; font-size: 1rem;">Confirmar
             Distribución</button>
     </form>
+
+    <!-- Container for HTMX Modal (Moved outside form) -->
+    <div id="modal-container"></div>
+
+    <style>
+        .history-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            position: relative;
+            background: var(--bg-card);
+            border-radius: 1rem;
+            max-width: 500px;
+            width: 90%;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            border: 1px solid var(--border-light);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+    </style>
 </div>
 
 <!-- History Table -->
