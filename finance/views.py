@@ -18,7 +18,30 @@ def nuevo_credito(request):
             return redirect('finance:lista_creditos')
     else:
         form = CreditoForm()
-    return render(request, 'finance/nuevo_credito.html', {'form': form})
+    return render(request, 'finance/nuevo_credito.html', {'form': form, 'title': 'Cargar Nuevo Crédito Presupuestario'})
+
+@login_required
+def editar_credito(request, credito_id):
+    credito = get_object_or_404(Credito, id=credito_id)
+    if request.method == "POST":
+        form = CreditoForm(request.POST, instance=credito)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Crédito actualizado correctamente.")
+            return redirect('finance:lista_creditos')
+    else:
+        form = CreditoForm(instance=credito)
+    return render(request, 'finance/nuevo_credito.html', {'form': form, 'title': 'Editar Crédito Presupuestario', 'is_edit': True})
+
+@login_required
+def eliminar_credito(request, credito_id):
+    credito = get_object_or_404(Credito, id=credito_id)
+    if request.method == "POST":
+        credito.delete()
+        messages.success(request, "Crédito eliminado correctamente.")
+        return redirect('finance:lista_creditos')
+    
+    return render(request, 'finance/confirmar_eliminar.html', {'credito': credito})
 
 @login_required
 def lista_creditos(request):
@@ -31,14 +54,16 @@ def lista_creditos(request):
     creditos = Credito.objects.filter(estado='VIGENTE').select_related('programa', 'fuente').order_by('-fecha_creacion')
     
     # Group credits by (programa, anio, trimestre, fuente)
-    grupos = defaultdict(lambda: {'total': 0, 'creditos': []})
+    grupos = defaultdict(lambda: {'total': 0, 'cuota': 0, 'creditos': []})
     
     for credito in creditos:
         key = (credito.programa.id, credito.anio, credito.trimestre, credito.fuente.id)
         grupos[key]['total'] += credito.monto_total
+        grupos[key]['cuota'] += credito.monto_cuota
         grupos[key]['creditos'].append({
             'id': credito.id,
             'monto': fmt_currency(credito.monto_total),
+            'cuota': fmt_currency(credito.monto_cuota),
             'monto_raw': credito.monto_total,
             'fecha': credito.fecha_creacion.strftime('%d/%m/%Y %H:%M')
         })
@@ -56,6 +81,7 @@ def lista_creditos(request):
             'trimestre': data['trimestre'],
             'fuente': data['fuente'],
             'total': fmt_currency(data['total']),
+            'cuota': fmt_currency(data['cuota']),
             'creditos': data['creditos'],
             'count': len(data['creditos'])
         })
@@ -102,7 +128,9 @@ def load_credit_history(request):
         total += credito.monto_total
         creditos_data.append({
             'id': credito.id,
-            'monto': fmt_currency(credito.monto_total),
+            'monto': fmt_currency(credito.monto_cuota),
+            'inciso': credito.inciso,
+            'principal': credito.principal,
             'fecha': credito.fecha_creacion.strftime('%d/%m/%Y %H:%M')
         })
         

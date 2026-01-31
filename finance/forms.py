@@ -48,9 +48,12 @@ from .models import Credito
 class CreditoForm(forms.ModelForm):
     class Meta:
         model = Credito
-        fields = ['programa', 'fuente', 'anio', 'trimestre', 'monto_total']
+        fields = ['programa', 'fuente', 'anio', 'trimestre', 'monto_total', 'monto_cuota', 'inciso', 'principal']
         widgets = {
             'monto_total': forms.NumberInput(attrs={'step': '0.01', 'class': 'form-input', 'placeholder': 'Ej: 15000000'}),
+            'monto_cuota': forms.NumberInput(attrs={'step': '0.01', 'class': 'form-input', 'placeholder': 'Ej: 5000000'}),
+            'inciso': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Ej: 2'}),
+            'principal': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Ej: 1'}),
             'programa': forms.Select(attrs={'class': 'form-input'}),
             'fuente': forms.Select(attrs={'class': 'form-input'}),
             'anio': forms.NumberInput(attrs={'class': 'form-input', 'value': 2026}),

@@ -9,16 +9,21 @@ import json
 def create_program(request):
     try:
         data = json.loads(request.body)
-        codigo = data.get('codigo')
+        programa = data.get('programa')
+        subprograma = data.get('subprograma')
         descripcion = data.get('descripcion')
         
-        if not codigo or not descripcion:
+        if not programa or not subprograma or not descripcion:
             return JsonResponse({'error': 'Faltan datos requeridos'}, status=400)
             
-        # Nivel 1 = Programa
+        # Format code as Program.Subprogram (e.g., 16.02)
+        codigo_completo = f"{programa}.{subprograma}"
+        
+        # Nivel 1 = Programa (Simplification for now, usually Program is Level 1, Subprogram Level 2)
+        # Storing as single Level 1 entry for simple dropdown selection
         prog = EstructuraProgramatica.objects.create(
             nivel=1,
-            codigo=codigo,
+            codigo=codigo_completo,
             descripcion=descripcion
         )
         

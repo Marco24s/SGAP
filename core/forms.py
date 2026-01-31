@@ -4,11 +4,12 @@ from .models import IncisoControl, GastoOperativo
 class IncisoControlForm(forms.ModelForm):
     class Meta:
         model = IncisoControl
-        fields = ['ff', 'programa', 'subprograma', 'nombre', 'nota', 'respaldo', 'asignacion', 'dev_com']
+        fields = ['ff', 'programa', 'subprograma', 'codigo_unidad', 'nombre', 'nota', 'respaldo', 'asignacion', 'dev_com']
         widgets = {
             'ff': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: 11'}),
             'programa': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: 16'}),
             'subprograma': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: 02'}),
+            'codigo_unidad': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: 111'}),
             'nombre': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: 2+3, PROM'}),
             'nota': forms.Textarea(attrs={'class': 'form-control', 'rows': 2, 'placeholder': 'Observaciones'}),
             'respaldo': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),

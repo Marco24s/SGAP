@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Eliminar Crédito{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 600px; margin: 2rem auto; text-align: center;">
+    <h2 style="color: var(--danger); margin-bottom: 1.5rem;">¿Estás seguro?</h2>
+    <p>Estás a punto de eliminar el siguiente crédito:</p>
+
+    <div style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 0.5rem; margin: 1.5rem 0; text-align: left;">
+        <p><strong>Programa:</strong> {{ credito.programa }}</p>
+        <p><strong>Periodo:</strong> {{ credito.anio }} - T{{ credito.trimestre }}</p>
+        <p><strong>Monto Total:</strong> ${{ credito.monto_total }}</p>
+    </div>
+
+    <p style="margin-bottom: 2rem;">Esta acción no se puede deshacer.</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <div style="display: flex; gap: 1rem; justify-content: center;">
+            <a href="{% url 'finance:lista_creditos' %}" class="btn">Cancelar</a>
+            <button type="submit" class="btn btn-primary"
+                style="background-color: var(--danger); border-color: var(--danger);">Sí, Eliminar</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

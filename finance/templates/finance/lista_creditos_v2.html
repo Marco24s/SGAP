@@ -12,19 +12,25 @@
     <table>
         <thead>
             <tr>
+                <th>FF</th>
                 <th>Programa</th>
                 <th>Periodo</th>
-                <th>Fuente Financiamiento</th>
-                <th>Monto Total</th>
+                <th>Cuota</th>
+                <th>Total (Techo)</th>
                 <th></th>
             </tr>
         </thead>
         <tbody>
             {% for grupo in creditos_agrupados %}
             <tr>
+                <td>FF{{ grupo.fuente.codigo }}</td>
                 <td>{{ grupo.programa }}</td>
                 <td>{{ grupo.anio|stringformat:"d" }} - T{{ grupo.trimestre }}</td>
-                <td>{{ grupo.fuente }}</td>
+                <td>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <strong style="color: var(--success);">${{ grupo.cuota }}</strong>
+                    </div>
+                </td>
                 <td>
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
                         <strong>${{ grupo.total }}</strong>
@@ -32,14 +38,40 @@
 
                 </td>
                 <td>
-                    {% if grupo.count == 1 %}
-                    <a href="{% url 'finance:distribuir_credito' grupo.creditos.0.id %}"
-                        class="btn btn-primary">Gestionar</a>
-                    {% else %}
-                    <button class="btn btn-primary"
-                        hx-get="{% url 'finance:load_credit_history' %}?programa={{ grupo.programa.id }}&anio={{ grupo.anio|stringformat:'d' }}&trimestre={{ grupo.trimestre }}&fuente={{ grupo.fuente.id }}&v=1"
-                        hx-target="#modal-container" hx-swap="innerHTML">Ver Opciones</button>
-                    {% endif %}
+                    <div style="display: flex; align-items: center; gap: 0.5rem; justify-content: flex-end;">
+                        {% if grupo.count == 1 %}
+                        <!-- Modify Icon -->
+                        <a href="{% url 'finance:editar_credito' grupo.creditos.0.id %}" class="btn-icon"
+                            title="Modificar" style="color: var(--text-main); padding: 0.25rem; display: flex;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                            </svg>
+                        </a>
+
+                        <!-- Delete Icon -->
+                        <a href="{% url 'finance:eliminar_credito' grupo.creditos.0.id %}" class="btn-icon"
+                            title="Eliminar" style="color: var(--danger); padding: 0.25rem; display: flex;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path
+                                    d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                                </path>
+                            </svg>
+                        </a>
+
+                        <a href="{% url 'finance:distribuir_credito' grupo.creditos.0.id %}" class="btn btn-primary"
+                            style="padding: 0.25rem 0.75rem; font-size: 0.875rem;">Gestionar</a>
+                        {% else %}
+                        <button class="btn btn-primary" style="padding: 0.25rem 0.75rem; font-size: 0.875rem;"
+                            hx-get="{% url 'finance:load_credit_history' %}?programa={{ grupo.programa.id }}&anio={{ grupo.anio|stringformat:'d' }}&trimestre={{ grupo.trimestre }}&fuente={{ grupo.fuente.id }}&v=1"
+                            hx-target="#modal-container" hx-swap="innerHTML">Ver Opciones</button>
+                        {% endif %}
+                    </div>
                 </td>
             </tr>
             {% endfor %}

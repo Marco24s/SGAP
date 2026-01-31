@@ -15,7 +15,7 @@
         {% csrf_token %}
         <div style="display: grid; gap: 1.5rem;">
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
                 <div>
                     <label style="display: block; margin-bottom: 0.5rem;">Año Fiscal</label>
                     {{ form.anio }}
@@ -23,6 +23,10 @@
                 <div>
                     <label style="display: block; margin-bottom: 0.5rem;">Trimestre</label>
                     {{ form.trimestre }}
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem;">Cuota (Dinero Ingresado)</label>
+                    {{ form.monto_cuota }}
                 </div>
             </div>
 
@@ -44,8 +48,13 @@
                 <h3 style="margin-top: 0; margin-bottom: 1.5rem;">Nuevo Programa Presupuestario</h3>
                 <div style="display: grid; gap: 1rem;">
                     <div>
-                        <label style="display: block; margin-bottom: 0.5rem;">Código</label>
-                        <input type="text" id="new-prog-codigo" class="form-input"
+                        <label style="display: block; margin-bottom: 0.5rem;">Programa</label>
+                        <input type="text" id="new-prog-programa" class="form-input"
+                            style="width: 100%; padding: 0.5rem; background: #0f172a; color: white; border: 1px solid #334155; border-radius: 0.5rem;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem;">Subprograma</label>
+                        <input type="text" id="new-prog-subprograma" class="form-input"
                             style="width: 100%; padding: 0.5rem; background: #0f172a; color: white; border: 1px solid #334155; border-radius: 0.5rem;">
                     </div>
                     <div>
@@ -63,10 +72,11 @@
 
             <script>
                 async function saveNewProgram() {
-                    const codigo = document.getElementById('new-prog-codigo').value;
+                    const programa = document.getElementById('new-prog-programa').value;
+                    const subprograma = document.getElementById('new-prog-subprograma').value;
                     const desc = document.getElementById('new-prog-desc').value;
 
-                    if (!codigo || !desc) {
+                    if (!programa || !subprograma || !desc) {
                         alert("Por favor complete todos los campos");
                         return;
                     }
@@ -79,7 +89,11 @@
                                 'Content-Type': 'application/json',
                                 'X-CSRFToken': csrfToken
                             },
-                            body: JSON.stringify({ codigo: codigo, descripcion: desc })
+                            body: JSON.stringify({
+                                programa: programa,
+                                subprograma: subprograma,
+                                descripcion: desc
+                            })
                         });
 
                         const data = await response.json();
@@ -92,7 +106,8 @@
 
                             // Close and clear
                             document.getElementById('modal-programa').close();
-                            document.getElementById('new-prog-codigo').value = '';
+                            document.getElementById('new-prog-programa').value = '';
+                            document.getElementById('new-prog-subprograma').value = '';
                             document.getElementById('new-prog-desc').value = '';
                         } else {
                             alert("Error: " + data.error);
@@ -109,8 +124,19 @@
                 {{ form.fuente }}
             </div>
 
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem;">Inciso</label>
+                    {{ form.inciso }}
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem;">Principal</label>
+                    {{ form.principal }}
+                </div>
+            </div>
+
             <div>
-                <label style="display: block; margin-bottom: 0.5rem;">Monto Total (Techo)</label>
+                <label style="display: block; margin-bottom: 0.5rem;">Tarea Plana (Techo)</label>
                 {{ form.monto_total }}
             </div>
 

@@ -63,6 +63,7 @@ class IncisoControl(models.Model):
     ff = models.CharField(max_length=10, blank=True, null=True, help_text="Fuente de Financiamiento (Ej: 11)")
     programa = models.CharField(max_length=20, blank=True, null=True, help_text="Ej: 01, 16")
     subprograma = models.CharField(max_length=20, blank=True, null=True, help_text="Ej: 02, 04")
+    codigo_unidad = models.CharField(max_length=20, blank=True, null=True, help_text="Ej: 111, 234")
     respaldo = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     asignacion = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     dev_com = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="Devengado + Compromiso")

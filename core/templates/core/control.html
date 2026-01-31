@@ -249,6 +249,7 @@
                         <th style="width: 50px;">FF</th>
                         <th style="width: 60px;">Prg</th>
                         <th style="width: 60px;">Sub</th>
+                        <th style="width: 80px;">Unidad</th>
                         <th>Inciso</th>
                         <th style="text-align: right;">Respaldo</th>
                         <th style="text-align: right;">Asignación</th>
@@ -265,6 +266,7 @@
                         <td style="font-size: 0.85rem; color: #64748b;">{{ inciso.ff|default:"-" }}</td>
                         <td style="font-size: 0.85rem; color: #64748b;">{{ inciso.programa|default:"-" }}</td>
                         <td style="font-size: 0.85rem; color: #64748b;">{{ inciso.subprograma|default:"-" }}</td>
+                        <td style="font-size: 0.85rem; color: #64748b;">{{ inciso.codigo_unidad|default:"-" }}</td>
                         <td style="font-weight: 600;">{{ inciso.nombre }}</td>
                         <td class="amount">${{ inciso.respaldo }}</td>
                         <td class="amount">${{ inciso.asignacion }}</td>
@@ -299,17 +301,20 @@
                             </span>
                             {% endif %}
                             <a href="{% url 'core:inciso_edit' inciso.pk %}"
-                                style="text-decoration: none; font-size: 1.2rem;">✏️</a>
+                                style="text-decoration: none; font-size: 1.2rem;" title="Editar">✏️</a>
+                            <a href="{% url 'core:inciso_edit' inciso.pk %}"
+                                style="text-decoration: none; font-size: 1.2rem; margin-left: 8px;"
+                                title="Reasignar / Redistribuir">🔀</a>
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="11" style="text-align: center;">No hay datos registrados.</td>
+                        <td colspan="12" style="text-align: center;">No hay datos registrados.</td>
                     </tr>
                     {% endfor %}
 
                     <tr class="total-row">
-                        <td colspan="5" style="text-align: right; padding-right: 1rem;">TOTAL</td>
+                        <td colspan="6" style="text-align: right; padding-right: 1rem;">TOTAL</td>
                         <td class="amount">${{ total_respaldo }}</td>
                         <td class="amount">${{ total_asignacion }}</td>
                         <td class="amount">${{ total_dev_com }}</td>

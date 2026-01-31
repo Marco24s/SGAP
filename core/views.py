@@ -101,13 +101,58 @@ def inciso_edit(request, pk):
         if form.is_valid():
             inciso = form.save(commit=False)
             
-            # Verificar si cambió la nota para guardar historial
-            # O guardar siempre que se edite, para tener traza (como pidió el usuario "registro de los cambios")
-            # Vamos a guardar si hay nota, o si la nota cambió.
-            # Para simplificar y cumplir con "registro de los cambios", guardamos un hito en el historial.
-            if inciso.nota:
-                 HistorialInciso.objects.create(inciso=inciso, nota=inciso.nota)
+            # Detectar cambios en campos clave
+            cambios = []
+            campos_a_verificar = {
+                'ff': 'FF',
+                'programa': 'Programa',
+                'subprograma': 'Subprograma',
+                'nombre': 'Inciso',
+                'respaldo': 'Respaldo',
+                'asignacion': 'Asignación',
+                'dev_com': 'Dev+Com'
+            }
             
+            # Comparar cleaned_data (nuevo) con el objeto original (viejo)
+            # Nota: inciso ya tiene los nuevos valores porque usamos commit=False pero form.save() actualiza la instancia.
+            # Sin embargo, `form.initial` no es confiable si el form no se inicializó con datos.
+            # Mejor estrategia: Recuperar el objeto de la BD *antes* de este bloque o comparar contra values pre-update.
+            # ALERTA: `form.save(commit=False)` ya actualizó `inciso` en memoria con los nuevos datos.
+            # Necesitamos los datos viejos. 
+            
+            # Revertimos lógica un poco: para comparar bien, necesitamos el objeto original.
+            # inciso_old = IncisoControl.objects.get(pk=pk) # Hacemos esto al principio de la vista, pero ya pasó.
+            
+            # Vamos a buscar el original de nuevo para estar seguros
+            old_inciso = IncisoControl.objects.get(pk=pk)
+            
+            for field, label in campos_a_verificar.items():
+                old_val = getattr(old_inciso, field)
+                new_val = getattr(inciso, field)
+                
+                # Normalizar None a '' para comparación de strings o 0 para números si hace falta,
+                # pero getattr raw suele ser suficiente si tipos coinciden.
+                if old_val != new_val:
+                    # Formatear valores numéricos o str
+                    cambios.append(f"{label}: {old_val} -> {new_val}")
+            
+            # 1. Guardar historial si hubo cambios estructurales/financieros
+            if cambios:
+                nota_cambio = "REDISTRIBUCIÓN / CAMBIO:\n" + "\n".join(cambios)
+                # Si el usuario TAMBIÉN escribió una nota, la agregamos
+                if inciso.nota and inciso.nota != old_inciso.nota:
+                     nota_cambio += f"\n\nNota editada: {inciso.nota}"
+                elif inciso.nota:
+                     # Si hay nota pero no cambió, quizás querramos preservarla en el log o no.
+                     # El usuario dijo "que ese movimiento quede registrado".
+                     pass
+                
+                HistorialInciso.objects.create(inciso=inciso, nota=nota_cambio)
+            
+            # 2. Si NO hubo cambios estructurales pero SÍ cambió la nota (edición simple de texto)
+            elif inciso.nota and inciso.nota != old_inciso.nota:
+                 HistorialInciso.objects.create(inciso=inciso, nota=inciso.nota)
+
             inciso.save()
             return redirect(reverse('core:control') + f"?q={inciso.cuatrigrama}")
     else:
