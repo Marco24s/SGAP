@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load humanize %}
+{% load humanize l10n %}
 
 {% block page_title %}Panel de Control{% endblock %}
 
@@ -50,6 +50,114 @@
 </div>
 
 <div style="display: grid; grid-template-columns: 1fr; gap: 1.5rem;">
+    <!-- Creditos Section -->
+    <div class="card">
+        <h3>Mis Créditos (Bolsas a Distribuir)</h3>
+        {% if creditos %}
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Fuente</th>
+                        <th>Programa</th>
+                        <th>T1</th>
+                        <th>T2</th>
+                        <th>T3</th>
+                        <th>T4</th>
+                        <th>Total (Techo)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for group in creditos %}
+                    <tr>
+                        <td>
+                            <span
+                                style="background: var(--bg-body); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; color: var(--text-muted);">
+                                FF{{ group.fuente.codigo }}
+                            </span>
+                        </td>
+                        <td style="font-weight: 500;">{{ group.programa }}</td>
+
+                        <!-- T1 -->
+                        <td>
+                            {% if 1 in group.quarters %}
+                            <div style="display: flex; flex-direction: column;">
+                                <a href="{% url 'finance:distribuir_credito' group.quarters.1.id %}"
+                                    style="text-decoration: none; color: inherit;">
+                                    <span style="font-weight: 600; color: var(--primary-blue); cursor: pointer;">
+                                        ${{ group.quarters.1.amount|floatformat:0|intcomma }}
+                                    </span>
+                                </a>
+                            </div>
+                            {% else %}
+                            <span style="color: var(--text-muted);">-</span>
+                            {% endif %}
+                        </td>
+
+                        <!-- T2 -->
+                        <td>
+                            {% if 2 in group.quarters %}
+                            <div style="display: flex; flex-direction: column;">
+                                <a href="{% url 'finance:distribuir_credito' group.quarters.2.id %}"
+                                    style="text-decoration: none; color: inherit;">
+                                    <span style="font-weight: 600; color: var(--primary-blue); cursor: pointer;">
+                                        ${{ group.quarters.2.amount|floatformat:0|intcomma }}
+                                    </span>
+                                </a>
+                            </div>
+                            {% else %}
+                            <span style="color: var(--text-muted);">-</span>
+                            {% endif %}
+                        </td>
+
+                        <!-- T3 -->
+                        <td>
+                            {% if 3 in group.quarters %}
+                            <div style="display: flex; flex-direction: column;">
+                                <a href="{% url 'finance:distribuir_credito' group.quarters.3.id %}"
+                                    style="text-decoration: none; color: inherit;">
+                                    <span style="font-weight: 600; color: var(--primary-blue); cursor: pointer;">
+                                        ${{ group.quarters.3.amount|floatformat:0|intcomma }}
+                                    </span>
+                                </a>
+                            </div>
+                            {% else %}
+                            <span style="color: var(--text-muted);">-</span>
+                            {% endif %}
+                        </td>
+
+                        <!-- T4 -->
+                        <td>
+                            {% if 4 in group.quarters %}
+                            <div style="display: flex; flex-direction: column;">
+                                <a href="{% url 'finance:distribuir_credito' group.quarters.4.id %}"
+                                    style="text-decoration: none; color: inherit;">
+                                    <span style="font-weight: 600; color: var(--primary-blue); cursor: pointer;">
+                                        ${{ group.quarters.4.amount|floatformat:0|intcomma }}
+                                    </span>
+                                </a>
+                            </div>
+                            {% else %}
+                            <span style="color: var(--text-muted);">-</span>
+                            {% endif %}
+                        </td>
+
+                        <!-- Total Row -->
+                        <td style="font-weight: 700;">
+                            ${{ group.techo|floatformat:0|intcomma }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 2rem;">
+            <p style="color: var(--text-muted);">No tiene créditos vigentes asignados.</p>
+        </div>
+        {% endif %}
+    </div>
+
     <!-- Semáforo Section -->
     <div class="card">
         <h3>Semáforo de Ejecución (Por Unidad)</h3>
@@ -68,8 +176,8 @@
                 <tbody>
                     {% for u in unidades_stats %}
                     <tr>
-                        <td style="font-weight: 500; color: var(--text-main);">{{ u.unidad.codigo }} - {{
-                            u.unidad.nombre }}</td>
+                        <td style="font-weight: 500; color: var(--text-main);">{{ u.unidad.codigo }} -
+                            {{u.unidad.nombre}}</td>
                         <td>${{ u.asignado|floatformat:0|intcomma }}</td>
                         <td>${{ u.ejecutado|floatformat:0|intcomma }}</td>
                         <td>
@@ -99,50 +207,6 @@
         </div>
         {% else %}
         <p style="padding: 1rem; color: var(--text-muted); text-align: center;">No hay distribución realizada aún.</p>
-        {% endif %}
-    </div>
-
-    <!-- Creditos Section -->
-    <div class="card">
-        <h3>Mis Créditos (Bolsas a Distribuir)</h3>
-        {% if creditos %}
-        <div style="overflow-x: auto;">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Programa</th>
-                        <th>Año-Trim</th>
-                        <th>Fuente</th>
-                        <th>Monto Total</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for c in creditos %}
-                    <tr>
-                        <td style="font-weight: 500;">{{ c.programa }}</td>
-                        <td>{{ c.anio }} - T{{ c.trimestre }}</td>
-                        <td>
-                            <span
-                                style="background: var(--bg-body); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; color: var(--text-muted);">
-                                {{ c.fuente }}
-                            </span>
-                        </td>
-                        <td style="font-weight: 600;">${{ c.monto_total|floatformat:0|intcomma }}</td>
-                        <td>
-                            <a href="{% url 'finance:distribuir_credito' c.id %}" class="btn btn-primary">
-                                Gestionar
-                            </a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% else %}
-        <div style="text-align: center; padding: 2rem;">
-            <p style="color: var(--text-muted);">No tiene créditos vigentes asignados.</p>
-        </div>
         {% endif %}
     </div>
 </div>

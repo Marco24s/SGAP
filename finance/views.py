@@ -87,6 +87,7 @@ def lista_creditos(request):
             'monto': fmt_currency(credito.monto_total),
             'cuota': fmt_currency(credito.monto_cuota),
             'monto_raw': credito.monto_total,
+            'recibido': credito.recibido,
             'fecha': credito.fecha_creacion.strftime('%d/%m/%Y %H:%M')
         })
         
@@ -111,6 +112,7 @@ def lista_creditos(request):
             'total': fmt_currency(data['total']),
             'cuota': fmt_currency(data['cuota']),
             'creditos': data['creditos'],
+            'is_recibido': data['creditos'][0]['recibido'] if data['creditos'] else True,
             'count': len(data['creditos'])
         }
         
@@ -219,6 +221,21 @@ def load_credit_history(request):
     return render(request, 'finance/partials/history_modal.html', context)
 
 @login_required
+def eliminar_asignacion(request, asignacion_id):
+    asignacion = get_object_or_404(Asignacion, pk=asignacion_id)
+    credito_id = asignacion.credito_origen.id
+    
+    try:
+        # Allowing GET for simple trash icon link, but ideally use form.
+        asignacion.delete()
+        messages.success(request, "Asignación eliminada correctamente.")
+
+    except Exception as e:
+         messages.error(request, f"No se puede eliminar la asignación: {e}")
+         
+    return redirect('finance:distribuir_credito', credito_id=credito_id)
+
+@login_required
 def distribuir_credito(request, credito_id):
     credito = get_object_or_404(Credito, pk=credito_id)
     asignaciones = credito.asignaciones.all()
@@ -235,9 +252,12 @@ def distribuir_credito(request, credito_id):
             
             # Retrieve inputs
             monto = float(request.POST.get('monto', 0))
-            if monto <= 0:
-                raise ValueError("El monto debe ser mayor a 0")
-                
+            solicitud_gfh = request.POST.get('solicitud_gfh', '')
+            asignacion_gfh = request.POST.get('asignacion_gfh', '')
+
+            if monto < 0:
+                 raise ValueError("El monto asignado debe ser mayor a 0")
+                 
             # Determine Clasificador based on Credit
             # Rule: We try to match the Credit's Inciso code to a ClasificadorGasto
             clasificador = ClasificadorGasto.objects.filter(nivel=1, codigo=credito.inciso).first()
@@ -252,28 +272,67 @@ def distribuir_credito(request, credito_id):
                      raise ValueError("Es obligatorio seleccionar una Obra para Inciso 4")
                 obra = EstructuraProgramatica.objects.get(pk=obra_id)
 
-            # Create Asignacion
-            Asignacion.objects.create(
-                uucc=uucc,
-                credito_origen=credito,
-                clasificador_gasto=clasificador,
-                monto=monto,
-                trimestre=credito.trimestre, # Inherit from Credit
-                obra=obra
-            )
-            
-            messages.success(request, f"Asignación registrada exitosamente para {uucc.codigo}.")
+            # Check if this is an update
+            asignacion_id = request.POST.get('asignacion_id')
+            if asignacion_id:
+                asignacion = get_object_or_404(Asignacion, pk=asignacion_id)
+                # Verify it belongs to this credit (security)
+                if asignacion.credito_origen != credito:
+                    raise ValueError("La asignación no corresponde a este crédito.")
+                
+                asignacion.uucc = uucc
+                asignacion.monto = monto
+                asignacion.solicitud_gfh = solicitud_gfh
+                asignacion.asignacion_gfh = asignacion_gfh
+                asignacion.obra = obra
+                asignacion.save()
+                messages.success(request, f"Asignación actualizada exitosamente para {uucc.codigo}.")
+            else:
+                # Create Asignacion
+                Asignacion.objects.create(
+                    uucc=uucc,
+                    credito_origen=credito,
+                    clasificador_gasto=clasificador,
+                    monto=monto,
+                    solicitud_gfh=solicitud_gfh,
+                    asignacion_gfh=asignacion_gfh,
+                    trimestre=credito.trimestre, # Inherit from Credit
+                    obra=obra
+                )
+                messages.success(request, f"Asignación registrada exitosamente para {uucc.codigo}.")
+
             return redirect('finance:distribuir_credito', credito_id=credito.id)
 
         except Exception as e:
             messages.error(request, f"Error al asignar: {e}")
             
+
+    # Calculate "Saldo Parcial Asignado" requested by user
+    # Logic: Sum of quotas (monto_cuota) for the same budget line (program, source, year, inciso)
+    # ONLY if received=True
+    related_credits = Credito.objects.filter(
+        programa=credito.programa,
+        fuente=credito.fuente,
+        anio=credito.anio,
+        inciso=credito.inciso
+    )
+    
+    saldo_parcial_asignado = 0
+    for c in related_credits:
+        if c.recibido:
+            saldo_parcial_asignado += c.monto_cuota
+
+    # Calculate Total Distributed (Saldo Asignado)
+    total_distribuido = credito.monto_total - credito.saldo_disponible
+
     context = {
         'credito': credito,
         'asignaciones': asignaciones,
         'incisos': incisos,
         'uuccs': uuccs,
-        'obras': obras
+        'obras': obras,
+        'saldo_parcial_asignado': saldo_parcial_asignado,
+        'total_distribuido': total_distribuido
     }
     return render(request, 'finance/distribuir.html', context)
 

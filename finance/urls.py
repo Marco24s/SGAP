@@ -10,6 +10,7 @@ urlpatterns = [
     path('distribuir/editar/<int:credito_id>/', views.editar_credito, name='editar_credito'),
     path('distribuir/eliminar/<int:credito_id>/', views.eliminar_credito, name='eliminar_credito'),
     path('distribuir/<int:credito_id>/', views.distribuir_credito, name='distribuir_credito'),
+    path('distribuir/asignacion/eliminar/<int:asignacion_id>/', views.eliminar_asignacion, name='eliminar_asignacion'),
     path('modificaciones/', views.lista_modificaciones, name='modificaciones'),
     path('modificaciones/nueva/', views.nueva_modificacion, name='nueva_modificacion'),
     path('autorizaciones/', views.lista_autorizaciones, name='lista_autorizaciones'),
@@ -21,4 +22,6 @@ urlpatterns = [
     
     # JSON API
     path('api/programs/create/', api_views.create_program, name='api_create_program'),
+    path('api/programs/<int:pk>/', api_views.get_program_details, name='api_get_program'),
+    path('api/programs/<int:pk>/update/', api_views.update_program, name='api_update_program'),
 ]

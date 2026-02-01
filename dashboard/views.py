@@ -9,18 +9,41 @@ def home(request):
     # 1. Global Summaries
     creditos_vigentes = Credito.objects.filter(estado='VIGENTE')
     
-    # 1. Global Summaries (Fixed to avoid dupes on Annual Ceiling)
-    creditos_vigentes = Credito.objects.filter(estado='VIGENTE')
-    
     # Calculate Total Budget ignoring duplicate Quotas for same Program/Inciso/Year
     total_presupuesto = 0
     seen_budgets = set()
+    
+    # Group credits for display
+    # Key: (programa_id, fuente_id, inciso, anio)
+    grouped_credits = {}
+    
     for c in creditos_vigentes:
-        # Key: Program, Source, Inciso, Year
+        # Key for Deduplication / Grouping
         key = (c.programa_id, c.fuente_id, c.inciso, c.anio)
+        
+        # 1. Calculate Total Budget (Techo)
         if key not in seen_budgets:
             total_presupuesto += c.monto_total
             seen_budgets.add(key)
+            
+        # 2. Group for Table Display
+        if key not in grouped_credits:
+            grouped_credits[key] = {
+                'programa': c.programa, # Object for display
+                'fuente': c.fuente,     # Object for display
+                'inciso': c.inciso,
+                'anio': c.anio,
+                'techo': c.monto_total,
+                'quarters': {} 
+            }
+        
+        # Add quarter info
+        # We store the quota amount and the specific credit ID for the link
+        grouped_credits[key]['quarters'][c.trimestre] = {
+            'amount': c.monto_cuota, # Display Quota Amount
+            'id': c.id,
+            'recibido': c.recibido
+        }
     
     # Total Distributed (Asignado)
     # We sum all assignments related to vigorous credits
@@ -66,14 +89,8 @@ def home(request):
             'label': status_label
         })
 
-    # Helper for formatting
-    def fmt(value):
-        # Format as 1,000,000 then swap to 1.000.000 for AR
-        return f"{value:,.0f}".replace(",", "X").replace(".", ",").replace("X", ".")
-
     context = {
-        'creditos': creditos_vigentes,
-        # Formatting handled in template (home.html)
+        'creditos': grouped_credits.values(), # Pass the list of grouped dicts
         'total_presupuesto': total_presupuesto,
         'total_asignado': total_asignado,
         'total_ejecutado': total_ejecutado,

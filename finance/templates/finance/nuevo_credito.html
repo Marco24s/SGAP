@@ -15,6 +15,11 @@
         {% csrf_token %}
         <div style="display: grid; gap: 1.5rem;">
 
+            <div>
+                <label style="display: block; margin-bottom: 0.5rem;">Tipo de Crédito</label>
+                {{ form.tipo_credito }}
+            </div>
+
             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
                 <div>
                     <label style="display: block; margin-bottom: 0.5rem;">Año Fiscal</label>
@@ -26,7 +31,13 @@
                 </div>
                 <div>
                     <label style="display: block; margin-bottom: 0.5rem;">Cuota (Dinero Ingresado)</label>
-                    {{ form.monto_cuota }}
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        {{ form.monto_cuota }}
+                        <div style="display: flex; align-items: center; gap: 0.25rem;">
+                            {{ form.recibido }}
+                            <small>¿Recibido?</small>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -36,6 +47,8 @@
                     <div style="flex-grow: 1;">
                         {{ form.programa }}
                     </div>
+                    <button type="button" onclick="openEditProgramModal()" class="btn btn-secondary"
+                        style="padding: 0.5rem 1rem; font-weight: bold;" title="Editar Programa Seleccionado">✎</button>
                     <button type="button" onclick="document.getElementById('modal-programa').showModal()"
                         class="btn btn-secondary" style="padding: 0.5rem 1rem; font-weight: bold;"
                         title="Agregar Nuevo Programa">+</button>
@@ -66,6 +79,35 @@
                         <button type="button" onclick="document.getElementById('modal-programa').close()" class="btn"
                             style="color: white;">Cancelar</button>
                         <button type="button" onclick="saveNewProgram()" class="btn btn-primary">Guardar</button>
+                    </div>
+                </div>
+            </dialog>
+
+            <!-- Modal for Edit Program -->
+            <dialog id="modal-editar-programa"
+                style="border: none; border-radius: 0.5rem; padding: 2rem; background: #1e293b; color: white; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);">
+                <h3 style="margin-top: 0; margin-bottom: 1.5rem;">Editar Programa Presupuestario</h3>
+                <input type="hidden" id="edit-prog-id">
+                <div style="display: grid; gap: 1rem;">
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem;">Programa</label>
+                        <input type="text" id="edit-prog-programa" class="form-input"
+                            style="width: 100%; padding: 0.5rem; background: #0f172a; color: white; border: 1px solid #334155; border-radius: 0.5rem;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem;">Subprograma</label>
+                        <input type="text" id="edit-prog-subprograma" class="form-input"
+                            style="width: 100%; padding: 0.5rem; background: #0f172a; color: white; border: 1px solid #334155; border-radius: 0.5rem;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem;">Descripción</label>
+                        <input type="text" id="edit-prog-desc" class="form-input"
+                            style="width: 100%; padding: 0.5rem; background: #0f172a; color: white; border: 1px solid #334155; border-radius: 0.5rem;">
+                    </div>
+                    <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1rem;">
+                        <button type="button" onclick="document.getElementById('modal-editar-programa').close()"
+                            class="btn" style="color: white;">Cancelar</button>
+                        <button type="button" onclick="saveEditedProgram()" class="btn btn-primary">Actualizar</button>
                     </div>
                 </div>
             </dialog>
@@ -109,6 +151,79 @@
                             document.getElementById('new-prog-programa').value = '';
                             document.getElementById('new-prog-subprograma').value = '';
                             document.getElementById('new-prog-desc').value = '';
+                        } else {
+                            alert("Error: " + data.error);
+                        }
+                    } catch (e) {
+                        console.error('Full Error:', e);
+                        alert("Error de conexión: " + e.message);
+                    }
+                }
+
+                async function openEditProgramModal() {
+                    const select = document.getElementById('{{ form.programa.id_for_label }}');
+                    const selectedId = select.value;
+
+                    if (!selectedId) {
+                        alert("Por favor seleccione un programa para editar.");
+                        return;
+                    }
+
+                    try {
+                        const response = await fetch(`/finance/api/programs/${selectedId}/`);
+                        if (!response.ok) throw new Error('Error al obtener datos');
+
+                        const data = await response.json();
+
+                        document.getElementById('edit-prog-id').value = data.id;
+                        document.getElementById('edit-prog-programa').value = data.programa;
+                        document.getElementById('edit-prog-subprograma').value = data.subprograma;
+                        document.getElementById('edit-prog-desc').value = data.descripcion;
+
+                        document.getElementById('modal-editar-programa').showModal();
+                    } catch (e) {
+                        alert("Error al cargar datos del programa: " + e.message);
+                    }
+                }
+
+                async function saveEditedProgram() {
+                    const id = document.getElementById('edit-prog-id').value;
+                    const programa = document.getElementById('edit-prog-programa').value;
+                    const subprograma = document.getElementById('edit-prog-subprograma').value;
+                    const desc = document.getElementById('edit-prog-desc').value;
+
+                    if (!programa || !subprograma || !desc) {
+                        alert("Por favor complete todos los campos");
+                        return;
+                    }
+
+                    try {
+                        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                        const response = await fetch(`/finance/api/programs/${id}/update/`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': csrfToken
+                            },
+                            body: JSON.stringify({
+                                programa: programa,
+                                subprograma: subprograma,
+                                descripcion: desc
+                            })
+                        });
+
+                        const data = await response.json();
+
+                        if (response.ok) {
+                            // Update option text
+                            const select = document.getElementById('{{ form.programa.id_for_label }}');
+                            const option = select.querySelector(`option[value="${id}"]`);
+                            if (option) {
+                                option.text = data.label;
+                            }
+
+                            document.getElementById('modal-editar-programa').close();
+                            alert("Programa actualizado correctamente");
                         } else {
                             alert("Error: " + data.error);
                         }

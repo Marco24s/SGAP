@@ -7,14 +7,27 @@
     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem;">
         <div>
             <h2 style="font-size: 1.1rem; margin-bottom: 0.5rem;">Resumen del Crédito</h2>
-            <div style="display: grid; grid-template-columns: auto auto; gap: 2rem;">
+            <div style="display: grid; grid-template-columns: repeat(4, auto); gap: 2rem;">
                 <div>
                     <small style="color: var(--text-muted); display: block;">Fuente Financiamiento</small>
                     <strong>{{ credito.fuente }}</strong>
                 </div>
                 <div>
-                    <small style="color: var(--text-muted); display: block;">Saldo Disponible</small>
-                    <strong style="color: var(--success); font-size: 1.1rem;">${{ credito.saldo_disponible }}</strong>
+                    <small style="color: var(--text-muted); display: block;">Saldo Parcial Asignado (Cuotas
+                        Recibidas)</small>
+                    <strong style="color: var(--success); font-size: 1.1rem;">${{ saldo_parcial_asignado }}</strong>
+                </div>
+                <div>
+                    <small style="color: var(--text-muted); display: block;">Saldo Asignado (Distribuido)</small>
+                    <strong style="color: var(--primary-blue); font-size: 1.1rem;">${{ total_distribuido }}</strong>
+                </div>
+                <div>
+                    <small style="color: var(--text-muted); display: block;">Saldo Pendiente de Asignar</small>
+                    <strong style="color: var(--warning); font-size: 1.1rem;">${{ credito.saldo_disponible }}</strong>
+                </div>
+                <div>
+                    <small style="color: var(--text-muted); display: block;">Total Asignado (Techo Anual)</small>
+                    <strong style="color: white; font-size: 1.1rem;">${{ credito.monto_total }}</strong>
                 </div>
             </div>
         </div>
@@ -23,6 +36,7 @@
 
     <form method="POST">
         {% csrf_token %}
+        <input type="hidden" id="asignacion_id" name="asignacion_id" value="">
 
         <!-- 1. Select Unit -->
         <div style="margin-bottom: 2rem;">
@@ -80,7 +94,33 @@
 
                     <div>
                         <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem;">Monto a Asignar</label>
-                        <input type="number" name="monto" class="form-input" placeholder="$0.00" step="0.01" required>
+                        <input type="text" id="monto-input" name="monto" class="form-input" placeholder="$0.00" required
+                            autocomplete="off">
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. GFH References -->
+        <div style="margin-bottom: 2rem;">
+            <label style="display: block; margin-bottom: 1rem; font-weight: 500;">3. Referencias GFH (Opcional)</label>
+            <div
+                style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 6px; padding: 1.5rem; max-width: 600px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                    <div>
+                        <label
+                            style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--text-muted);">Solicitado
+                            por GFH</label>
+                        <input type="text" name="solicitud_gfh" class="form-input"
+                            placeholder="Ref. Solicitud (Texto/N°)" autocomplete="off">
+                    </div>
+                    <div>
+                        <label
+                            style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--text-muted);">Asignado
+                            por GFH</label>
+                        <input type="text" name="asignacion_gfh" class="form-input"
+                            placeholder="Ref. Asignación (Texto/N°)" autocomplete="off">
                     </div>
                 </div>
             </div>
@@ -89,6 +129,35 @@
         <button type="submit" class="btn btn-primary" style="padding: 0.75rem 2rem; font-size: 1rem;">Confirmar
             Distribución</button>
     </form>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const montoInput = document.getElementById('monto-input');
+            const form = montoInput.closest('form');
+
+            // Formatters
+            if (montoInput) {
+                montoInput.addEventListener('input', function (e) {
+                    let value = this.value.replace(/[^0-9,]/g, '');
+                    let parts = value.split(',');
+                    let integerPart = parts[0];
+                    let decimalPart = parts.length > 1 ? ',' + parts[1].substring(0, 2) : '';
+                    integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+                    this.value = integerPart + decimalPart;
+                });
+            }
+
+            form.addEventListener('submit', function (e) {
+                // Clean input
+                if (montoInput) {
+                    let rawMonto = montoInput.value.replace(/\./g, '').replace(',', '.');
+                    montoInput.value = rawMonto;
+                }
+            });
+        });
+    </script>
+
 
     <!-- Container for HTMX Modal (Moved outside form) -->
     <div id="modal-container"></div>
@@ -160,7 +229,7 @@
                 <th>Clasificador</th>
                 <th>Obra</th>
                 <th>Monto</th>
-                <th>Estado</th>
+                <th style="text-align: right;">Acciones</th>
             </tr>
         </thead>
         <tbody>
@@ -171,6 +240,37 @@
                 <td>{{ a.obra.codigo|default:"-" }}</td>
                 <td>${{ a.monto }}</td>
                 <td style="color: var(--success);">Asignado</td>
+                <td style="text-align: right;">
+                    <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                        <!-- Edit Button -->
+                        <button type="button"
+                            onclick="editarAsignacion('{{ a.id }}', '{{ a.uucc.id }}', '{{ a.obra.id|default_if_none:'' }}', '{{ a.monto|stringformat:'f' }}', '{{ a.uucc.codigo }} ({{ a.uucc.sigla }})', '{{ a.solicitud_gfh|default_if_none:'' }}', '{{ a.asignacion_gfh|default_if_none:'' }}')"
+                            style="background: none; border: none; cursor: pointer; color: var(--primary-blue);"
+                            title="Editar">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                            </svg>
+                        </button>
+
+                        <!-- Delete Button -->
+                        <button type="button"
+                            onclick="confirmarEliminacion('{% url 'finance:eliminar_asignacion' a.id %}')"
+                            style="background: none; border: none; cursor: pointer; color: var(--danger); display: flex; align-items: center;"
+                            title="Eliminar">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path
+                                    d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                                </path>
+                            </svg>
+                        </button>
+                    </div>
+                </td>
             </tr>
             {% endfor %}
         </tbody>
@@ -179,4 +279,168 @@
     <p style="padding: 1rem; color: var(--text-muted);">Aún no se han distribuido fondos de este crédito.</p>
     {% endif %}
 </div>
+
+<!-- Delete Confirmation Modal -->
+<div id="delete-modal" class="history-modal" style="display: none;">
+    <div class="modal-overlay" onclick="closeDeleteModal()"></div>
+    <div class="modal-content" style="max-width: 400px; text-align: center;">
+        <div class="modal-header" style="justify-content: center; border-bottom: none; padding-bottom: 0;">
+            <div style="background: rgba(239, 68, 68, 0.1); padding: 1rem; border-radius: 50%;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+                    stroke="var(--danger)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z">
+                    </path>
+                    <line x1="12" y1="9" x2="12" y2="13"></line>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+            </div>
+        </div>
+        <div class="modal-body">
+            <h3 style="margin-top: 0; margin-bottom: 0.5rem; color: var(--text-primary);">¿Eliminar Asignación?</h3>
+            <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+                Se procederá a eliminar la asignación correspondiente. Esta acción no se puede deshacer.
+            </p>
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+                <button onclick="closeDeleteModal()" class="btn btn-secondary" style="width: 100%;">Cancelar</button>
+                <a id="btn-confirm-delete" href="#" class="btn btn-danger"
+                    style="width: 100%; background-color: var(--danger); color: white;">Eliminar</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div id="edit-modal" class="history-modal" style="display: none;">
+    <div class="modal-overlay" onclick="closeEditModal()"></div>
+    <div class="modal-content" style="max-width: 500px; padding: 0;">
+        <div class="modal-header" style="background: var(--bg-card-hover);">
+            <h3 style="margin: 0; font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="var(--primary-blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+                Modificar Asignación
+            </h3>
+            <button class="modal-close" onclick="closeEditModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form method="POST" id="edit-form">
+                {% csrf_token %}
+                <input type="hidden" id="edit_asignacion_id" name="asignacion_id">
+                <input type="hidden" id="edit_uucc_id" name="uucc">
+                <input type="hidden" id="edit_obra_id" name="obra">
+
+                <div style="margin-bottom: 1.5rem;">
+                    <label
+                        style="display: block; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.25rem;">Unidad
+                        (Beneficiario)</label>
+                    <div id="edit_uucc_display"
+                        style="font-weight: 600; font-size: 1rem; color: white; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-light);">
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 1.5rem;">
+                    <label
+                        style="display: block; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.25rem;">Monto
+                        a Asignar</label>
+                    <input type="text" id="edit_monto_input" name="monto" class="form-input"
+                        style="font-size: 1.25rem; font-weight: 600; color: var(--primary-blue);" autocomplete="off">
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                    <div>
+                        <label
+                            style="display: block; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.25rem;">Ref.
+                            Solicitud (GFH)</label>
+                        <input type="text" id="edit_solicitud_gfh" name="solicitud_gfh" class="form-input"
+                            placeholder="Opcional">
+                    </div>
+                    <div>
+                        <label
+                            style="display: block; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.25rem;">Ref.
+                            Asignación (GFH)</label>
+                        <input type="text" id="edit_asignacion_gfh" name="asignacion_gfh" class="form-input"
+                            placeholder="Opcional">
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                    <button type="button" onclick="closeEditModal()" class="btn btn-secondary">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Modificar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function confirmarEliminacion(url) {
+        document.getElementById('btn-confirm-delete').href = url;
+        document.getElementById('delete-modal').style.display = 'flex';
+    }
+
+    function closeDeleteModal() {
+        document.getElementById('delete-modal').style.display = 'none';
+    }
+
+    function editarAsignacion(id, uuccId, obraId, monto, uuccNombre, solicitudGfh, asignacionGfh) {
+        // Safe Parse
+        let amount = parseFloat(monto.replace(',', '.'));
+        if (isNaN(amount)) amount = monto;
+
+        // Format for Input
+        let parts = amount.toString().split('.');
+        let integerPart = parts[0];
+        let decimalPart = parts.length > 1 ? ',' + parts[1] : ',00';
+        integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+
+        // Populate
+        document.getElementById('edit_asignacion_id').value = id;
+        document.getElementById('edit_uucc_id').value = uuccId;
+        document.getElementById('edit_obra_id').value = obraId;
+        document.getElementById('edit_uucc_display').textContent = uuccNombre;
+        document.getElementById('edit_monto_input').value = integerPart + decimalPart;
+
+        // Populate Text Fields
+        document.getElementById('edit_solicitud_gfh').value = solicitudGfh || '';
+        document.getElementById('edit_asignacion_gfh').value = asignacionGfh || '';
+
+        // Setup input formatter for the modal input
+        setupMontoInput('edit_monto_input');
+
+        // Show
+        document.getElementById('edit-modal').style.display = 'flex';
+    }
+
+    function closeEditModal() {
+        document.getElementById('edit-modal').style.display = 'none';
+    }
+
+    // Helper to attach listeners to any amount input
+    function setupMontoInput(inputId) {
+        const input = document.getElementById(inputId);
+        if (!input) return;
+
+        // Remove old listeners to avoid duplicates if called multiple times (though simple overwrite is fine usually)
+        let newClone = input.cloneNode(true);
+        input.parentNode.replaceChild(newClone, input);
+
+        newClone.addEventListener('input', function (e) {
+            let value = this.value.replace(/[^0-9,]/g, '');
+            let parts = value.split(',');
+            let integerPart = parts[0];
+            let decimalPart = parts.length > 1 ? ',' + parts[1].substring(0, 2) : '';
+            integerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            this.value = integerPart + decimalPart;
+        });
+
+        // Form submit handler needs to clean this specific input
+        const form = newClone.closest('form');
+        form.onsubmit = function () {
+            let rawValue = newClone.value.replace(/\./g, '').replace(',', '.');
+            newClone.value = rawValue;
+        };
+    }
+</script>
 {% endblock %}

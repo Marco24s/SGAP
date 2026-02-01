@@ -34,9 +34,9 @@
             <tr>
                 {% if group_by == 'default' %}
                 <th>FF</th>
-                <th>Inciso</th>
                 <th>Programa</th>
                 <th>Periodo</th>
+                <th>Inciso</th>
                 <th>Cuota</th>
                 <th>Total (Techo)</th>
                 <th></th>
@@ -58,12 +58,13 @@
             <tr>
                 {% if group_by == 'default' %}
                 <td>FF{{ grupo.fuente.codigo }}</td>
-                <td>{{ grupo.inciso }}</td>
                 <td>{{ grupo.programa }}</td>
                 <td>{{ grupo.anio|unlocalize }} - T{{ grupo.trimestre }}</td>
+                <td>{{ grupo.inciso }}</td>
                 <td>
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        <strong style="color: var(--success);">${{ grupo.cuota }}</strong>
+                        <strong class="{% if grupo.is_recibido %}text-success{% else %}text-danger{% endif %}"> $
+                            {{grupo.cuota }}</strong>
                     </div>
                 </td>
                 <td>
@@ -213,6 +214,14 @@
         padding: 1.5rem;
         overflow-y: auto;
         max-height: calc(80vh - 100px);
+    }
+
+    .text-success {
+        color: var(--success);
+    }
+
+    .text-danger {
+        color: var(--danger);
     }
 </style>
 {% endblock %}

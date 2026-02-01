@@ -7,16 +7,23 @@ class Credito(models.Model):
         ("CADUCADO", "Caducado"),
         ("DEVENGADO", "Devengado"),
     )
+
+    TIPO_CREDITO_CHOICES = (
+        ("ASIGNACION", "Asignación"),
+        ("REFUERZO", "Refuerzo"),
+    )
     
     programa = models.ForeignKey(EstructuraProgramatica, on_delete=models.CASCADE, related_name="creditos")
     fuente = models.ForeignKey(FuenteFinanciamiento, on_delete=models.PROTECT)
     monto_total = models.DecimalField(max_digits=12, decimal_places=2)
     monto_cuota = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="Dinero ingresado (Cuota)")
+    recibido = models.BooleanField(default=True, help_text="Indica si la cuota ya fue recibida efectivamente")
     inciso = models.CharField(max_length=10, help_text="Inciso", default="")
     principal = models.CharField(max_length=10, help_text="Partida Principal", default="")
     anio = models.IntegerField(help_text="Año fiscal")
     trimestre = models.IntegerField(choices=[(1, "1° Trimestre"), (2, "2° Trimestre"), (3, "3° Trimestre"), (4, "4° Trimestre")])
     estado = models.CharField(max_length=20, choices=ESTADO_CHOICES, default="VIGENTE")
+    tipo_credito = models.CharField(max_length=20, choices=TIPO_CREDITO_CHOICES, default="ASIGNACION", verbose_name="Tipo de Crédito")
     fecha_creacion = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -43,7 +50,9 @@ class Asignacion(models.Model):
     clasificador_gasto = models.ForeignKey(ClasificadorGasto, on_delete=models.PROTECT)
     # Rule 5.2: Requirement to associate an Obra for Inciso 4
     obra = models.ForeignKey(EstructuraProgramatica, on_delete=models.PROTECT, null=True, blank=True, related_name="asignaciones_obra", help_text="Obligatorio para Inciso 4 (Inversión)")
-    monto = models.DecimalField(max_digits=12, decimal_places=2)
+    monto = models.DecimalField(max_digits=12, decimal_places=2, help_text="Monto asignado por GFH")
+    solicitud_gfh = models.CharField(max_length=100, blank=True, null=True, help_text="Referencia solicitada por GFH (Texto/Números)")
+    asignacion_gfh = models.CharField(max_length=100, blank=True, null=True, help_text="Referencia asignada por GFH (Texto/Números)")
     trimestre = models.IntegerField(choices=TRIMESTRE_CHOICES)
     
     def clean(self):
@@ -54,7 +63,15 @@ class Asignacion(models.Model):
         # Note: We exclude self if updating to avoid double counting
         current_assigned = self.credito_origen.asignaciones.exclude(pk=self.pk).aggregate(total=models.Sum('monto'))['total'] or 0
         if current_assigned + self.monto > self.credito_origen.monto_total:
-             raise ValidationError(f"El monto excede el crédito disponible. Disponible: {self.credito_origen.monto_total - current_assigned}")
+             raise ValidationError("IMPOSIBLE ASIGNAR ESE MONTO, SUPERA EL SALDO DISPONIBLE")
+
+        # 1.1 Validation: Warning/Error if exceeds 'Real' Cash (Cuota)
+        # User requested to indicate how much we are exceeding the real available quota
+        if current_assigned + self.monto > self.credito_origen.monto_cuota:
+            diff = (current_assigned + self.monto) - self.credito_origen.monto_cuota
+            # Formatting as per locale roughly
+            diff_str = f"{diff:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+            raise ValidationError(f"Atención: El monto a asignar supera el saldo de cuota recibida en ${diff_str}")
 
         # 2. Validation: Granularity based on Inciso (Art 2.01) [SIMPLIFIED FOR MVP]
         # Logic: If Inciso 1 (Personal) -> Required Level 3 (Parcial)
