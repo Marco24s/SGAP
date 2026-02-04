@@ -19,7 +19,8 @@ def home(request):
     
     for c in creditos_vigentes:
         # Key for Deduplication / Grouping
-        key = (c.programa_id, c.fuente_id, c.inciso, c.anio)
+        # Include principal to separate them
+        key = (c.programa_id, c.fuente_id, c.inciso, c.principal, c.anio)
         
         # 1. Calculate Total Budget (Techo)
         if key not in seen_budgets:
@@ -32,6 +33,7 @@ def home(request):
                 'programa': c.programa, # Object for display
                 'fuente': c.fuente,     # Object for display
                 'inciso': c.inciso,
+                'principal': c.principal,
                 'anio': c.anio,
                 'techo': c.monto_total,
                 'quarters': {} 

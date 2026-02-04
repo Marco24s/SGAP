@@ -93,6 +93,30 @@
                     {% endif %}
 
                     <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem;">Objeto (Requerido)</label>
+                        <select id="objeto-select" name="objeto" class="form-input" required>
+                            <option value="">-- Seleccione Objeto --</option>
+                            <option value="2+3">2+3</option>
+                            <option value="PROM">PROM</option>
+                            <option value="RYC PAIS">RYC PAIS</option>
+                            <option value="RYC EXTERIOR">RYC EXTERIOR</option>
+                            <option value="4">4</option>
+                            <option value="GGOO">GGOO</option>
+                            <option value="SS.BB.">SS.BB.</option>
+                            <option value="PYV">PYV</option>
+                            <option value="20">20</option>
+                            <option value="40">40</option>
+                            <option value="50">50</option>
+                            <option value="70">70</option>
+                            <option value="87">87</option>
+                            <option value="90">90</option>
+                            <option value="95">95</option>
+                            <option value="99">99</option>
+                            <option value="Vestuario PACID">Vestuario PACID</option>
+                        </select>
+                    </div>
+
+                    <div>
                         <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem;">Monto a Asignar</label>
                         <input type="text" id="monto-input" name="monto" class="form-input" placeholder="$0.00" required
                             autocomplete="off">
@@ -220,7 +244,10 @@
 
 <!-- History Table -->
 <div class="card" style="margin-top: 2rem;">
-    <h3>Historial de Asignaciones</h3>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h3 style="margin: 0;">Historial de Asignaciones</h3>
+        <input type="text" id="table-search" class="form-input" placeholder="Buscar..." style="width: 250px; padding: 0.4rem 0.8rem;">
+    </div>
     {% if asignaciones %}
     <table>
         <thead>
@@ -228,6 +255,7 @@
                 <th>Unidad</th>
                 <th>Clasificador</th>
                 <th>Obra</th>
+                <th>Objeto</th>
                 <th>Monto</th>
                 <th style="text-align: right;">Acciones</th>
             </tr>
@@ -238,13 +266,14 @@
                 <td>{{ a.uucc.codigo }} ({{ a.uucc.sigla }})</td>
                 <td>{{ a.clasificador_gasto.codigo }} - {{ a.clasificador_gasto.descripcion }}</td>
                 <td>{{ a.obra.codigo|default:"-" }}</td>
+                <td>{{ a.objeto|default:"-" }}</td>
                 <td>${{ a.monto }}</td>
                 <td style="color: var(--success);">Asignado</td>
                 <td style="text-align: right;">
                     <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
                         <!-- Edit Button -->
                         <button type="button"
-                            onclick="editarAsignacion('{{ a.id }}', '{{ a.uucc.id }}', '{{ a.obra.id|default_if_none:'' }}', '{{ a.monto|stringformat:'f' }}', '{{ a.uucc.codigo }} ({{ a.uucc.sigla }})', '{{ a.solicitud_gfh|default_if_none:'' }}', '{{ a.asignacion_gfh|default_if_none:'' }}')"
+                            onclick="editarAsignacion('{{ a.id }}', '{{ a.uucc.id }}', '{{ a.obra.id|default_if_none:'' }}', '{{ a.monto|stringformat:'f' }}', '{{ a.uucc.codigo }} ({{ a.uucc.sigla }})', '{{ a.solicitud_gfh|default_if_none:'' }}', '{{ a.asignacion_gfh|default_if_none:'' }}', '{{ a.objeto|default_if_none:'' }}')"
                             style="background: none; border: none; cursor: pointer; color: var(--primary-blue);"
                             title="Editar">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
@@ -341,6 +370,31 @@
                 </div>
 
                 <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.25rem;">Objeto (Requerido)</label>
+                    <select id="edit_objeto_select" name="objeto" class="form-input" required>
+                        <option value="">-- Seleccione Objeto --</option>
+                        <option value="2+3">2+3</option>
+                        <option value="PROM">PROM</option>
+                        <option value="RYC PAIS">RYC PAIS</option>
+                        <option value="RYC EXTERIOR">RYC EXTERIOR</option>
+                        <option value="4">4</option>
+                        <option value="GGOO">GGOO</option>
+                        <option value="SS.BB.">SS.BB.</option>
+                        <option value="PYV">PYV</option>
+                        <option value="20">20</option>
+                        <option value="40">40</option>
+                        <option value="50">50</option>
+                        <option value="70">70</option>
+                        <option value="87">87</option>
+                        <option value="90">90</option>
+                        <option value="95">95</option>
+                        <option value="99">99</option>
+                        <option value="Vestuario PACID">Vestuario PACID</option>
+                    </select>
+                </div>
+
+
+                <div style="margin-bottom: 1.5rem;">
                     <label
                         style="display: block; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.25rem;">Monto
                         a Asignar</label>
@@ -384,7 +438,7 @@
         document.getElementById('delete-modal').style.display = 'none';
     }
 
-    function editarAsignacion(id, uuccId, obraId, monto, uuccNombre, solicitudGfh, asignacionGfh) {
+    function editarAsignacion(id, uuccId, obraId, monto, uuccNombre, solicitudGfh, asignacionGfh, objeto) {
         // Safe Parse
         let amount = parseFloat(monto.replace(',', '.'));
         if (isNaN(amount)) amount = monto;
@@ -405,6 +459,7 @@
         // Populate Text Fields
         document.getElementById('edit_solicitud_gfh').value = solicitudGfh || '';
         document.getElementById('edit_asignacion_gfh').value = asignacionGfh || '';
+        document.getElementById('edit_objeto_select').value = objeto || '';
 
         // Setup input formatter for the modal input
         setupMontoInput('edit_monto_input');
@@ -416,6 +471,24 @@
     function closeEditModal() {
         document.getElementById('edit-modal').style.display = 'none';
     }
+
+    // Table Filter
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('table-search');
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                const filter = this.value.toLowerCase();
+                const table = document.querySelector('table');
+                if (!table) return;
+                
+                const rows = table.querySelectorAll('tbody tr');
+                rows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(filter) ? '' : 'none';
+                });
+            });
+        }
+    });
 
     // Helper to attach listeners to any amount input
     function setupMontoInput(inputId) {

@@ -50,8 +50,8 @@ class CreditoForm(forms.ModelForm):
         model = Credito
         fields = ['programa', 'fuente', 'anio', 'trimestre', 'monto_total', 'monto_cuota', 'recibido', 'inciso', 'principal', 'tipo_credito']
         widgets = {
-            'monto_total': forms.NumberInput(attrs={'step': '0.01', 'class': 'form-input', 'placeholder': 'Ej: 15000000'}),
-            'monto_cuota': forms.NumberInput(attrs={'step': '0.01', 'class': 'form-input', 'placeholder': 'Ej: 5000000'}),
+            'monto_total': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Ej: 15.000.000'}),
+            'monto_cuota': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Ej: 5.000.000'}),
             'recibido': forms.CheckboxInput(attrs={'class': 'form-checkbox', 'style': 'width: 1.25rem; height: 1.25rem;'}),
             'inciso': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Ej: 2'}),
             'principal': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Ej: 1'}),

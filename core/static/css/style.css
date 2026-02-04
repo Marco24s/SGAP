@@ -56,6 +56,16 @@ body {
     flex-direction: column;
     padding: 1.5rem;
     flex-shrink: 0;
+    transition: all 0.3s ease;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.sidebar.collapsed {
+    width: 0;
+    padding-left: 0;
+    padding-right: 0;
+    opacity: 0;
 }
 
 .logo-area {
@@ -311,4 +321,22 @@ tr:last-child td {
 .stat-label {
     font-size: 0.875rem;
     color: var(--text-muted);
+}
+
+/* Form Elements */
+.form-input {
+    width: 100%;
+    padding: 0.5rem 1rem;
+    background-color: var(--bg-body);
+    border: 1px solid var(--border-light);
+    border-radius: 0.5rem;
+    color: var(--text-main);
+    font-size: 0.875rem;
+    transition: all 0.2s;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }

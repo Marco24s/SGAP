@@ -54,6 +54,27 @@ class Asignacion(models.Model):
     solicitud_gfh = models.CharField(max_length=100, blank=True, null=True, help_text="Referencia solicitada por GFH (Texto/Números)")
     asignacion_gfh = models.CharField(max_length=100, blank=True, null=True, help_text="Referencia asignada por GFH (Texto/Números)")
     trimestre = models.IntegerField(choices=TRIMESTRE_CHOICES)
+
+    OBJETO_CHOICES = (
+        ('2+3', '2+3'),
+        ('PROM', 'PROM'),
+        ('RYC PAIS', 'RYC PAIS'),
+        ('RYC EXTERIOR', 'RYC EXTERIOR'),
+        ('4', '4'),
+        ('GGOO', 'GGOO'),
+        ('SS.BB.', 'SS.BB.'),
+        ('PYV', 'PYV'),
+        ('20', '20'),
+        ('40', '40'),
+        ('50', '50'),
+        ('70', '70'),
+        ('87', '87'),
+        ('90', '90'),
+        ('95', '95'),
+        ('99', '99'),
+        ('Vestuario PACID', 'Vestuario PACID'),
+    )
+    objeto = models.CharField(max_length=50, choices=OBJETO_CHOICES, blank=True, null=True, help_text="Objeto del Gasto")
     
     def clean(self):
         from django.core.exceptions import ValidationError

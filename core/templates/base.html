@@ -12,7 +12,7 @@
 
 <body>
     <div class="app-container">
-        <aside class="sidebar">
+        <aside class="sidebar" id="sidebar">
             <div class="logo-area">
                 <div class="logo-icon">⚓</div>
                 <h2>S.G.A.P.</h2>
@@ -30,11 +30,20 @@
 
         <main class="content-area">
             <header class="top-bar">
-                <div class="header-title">
-                    <h1>
-                        <span style="color: var(--primary-blue);">✈</span>
-                        Sistema Integral de Gestión
-                    </h1>
+                <div class="header-left" style="display: flex; align-items: center; gap: 1rem;">
+                    <button id="sidebar-toggle" class="btn-icon" style="background: none; border: none; cursor: pointer; color: var(--text-muted); padding: 0.5rem; display: flex; align-items: center; justify-content: center; border-radius: 0.5rem; transition: background 0.2s;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="3" y1="12" x2="21" y2="12"></line>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <line x1="3" y1="18" x2="21" y2="18"></line>
+                        </svg>
+                    </button>
+                    <div class="header-title">
+                        <h1>
+                            <span style="color: var(--primary-blue);">✈</span>
+                            Sistema Integral de Gestión
+                        </h1>
+                    </div>
                 </div>
                 <div class="user-profile">
                     <a href="{% url 'core:landing' %}" class="btn"
@@ -64,6 +73,24 @@
             </div>
         </main>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.getElementById('sidebar');
+            const toggleBtn = document.getElementById('sidebar-toggle');
+            
+            // Check localStorage
+            const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+            if (isCollapsed) {
+                sidebar.classList.add('collapsed');
+            }
+
+            toggleBtn.addEventListener('click', function() {
+                sidebar.classList.toggle('collapsed');
+                localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+            });
+        });
+    </script>
 </body>
 
 </html>

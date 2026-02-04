@@ -232,6 +232,38 @@
                         alert("Error de conexión: " + e.message);
                     }
                 }
+
+                document.addEventListener('DOMContentLoaded', function() {
+                    function formatNumber(input) {
+                        let value = input.value.replace(/\D/g, ''); // Remove all non-digits
+                        value = value.replace(/\B(?=(\d{3})+(?!\d))/g, "."); // Add dots
+                        input.value = value;
+                    }
+
+                    const montoCuota = document.getElementById('id_monto_cuota');
+                    const montoTotal = document.getElementById('id_monto_total');
+                    const form = document.querySelector('form');
+
+                    if (montoCuota) {
+                        montoCuota.addEventListener('input', function() { formatNumber(this); });
+                        // Initial format if value exists
+                        formatNumber(montoCuota);
+                    }
+                    if (montoTotal) {
+                        montoTotal.addEventListener('input', function() { formatNumber(this); });
+                        // Initial format if value exists
+                        formatNumber(montoTotal);
+                    }
+
+                    form.addEventListener('submit', function(e) {
+                         if (montoCuota) {
+                            montoCuota.value = montoCuota.value.replace(/\./g, '');
+                         }
+                         if (montoTotal) {
+                            montoTotal.value = montoTotal.value.replace(/\./g, '');
+                         }
+                    });
+                });
             </script>
 
             <div>

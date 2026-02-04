@@ -10,7 +10,7 @@
     </div>
 
     <!-- Grouping Controls -->
-    <div style="margin-bottom: 1.5rem; display: flex; gap: 0.5rem; align-items: center;">
+    <div style="margin-bottom: 1.5rem; display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
         <span style="font-size: 0.9rem; color: var(--text-muted); margin-right: 0.5rem;">Agrupar por:</span>
         <a href="?group_by=default"
             class="btn {% if group_by == 'default' %}btn-primary{% else %}btn-secondary{% endif %}"
@@ -23,13 +23,16 @@
         <a href="?group_by=inciso"
             class="btn {% if group_by == 'inciso' %}btn-primary{% else %}btn-secondary{% endif %}"
             style="padding: 0.25rem 0.75rem; font-size: 0.85rem; border: 1px solid var(--border-light);">Inciso</a>
+        
+        <!-- Search Input -->
+        <input type="text" id="credit-search" class="form-input" placeholder="Buscar..." style="width: 200px; padding: 0.3rem 0.8rem; margin-left: 1rem;">
 
         <div style="margin-left: auto; font-weight: 700; color: var(--text-main);">
             Total Global: <span style="color: var(--primary-blue);">${{ grand_total }}</span>
         </div>
     </div>
 
-    <table>
+    <table id="credits-table">
         <thead>
             <tr>
                 {% if group_by == 'default' %}
@@ -37,6 +40,7 @@
                 <th>Programa</th>
                 <th>Periodo</th>
                 <th>Inciso</th>
+                <th>Principal</th>
                 <th>Cuota</th>
                 <th>Total (Techo)</th>
                 <th></th>
@@ -61,6 +65,7 @@
                 <td>{{ grupo.programa }}</td>
                 <td>{{ grupo.anio|unlocalize }} - T{{ grupo.trimestre }}</td>
                 <td>{{ grupo.inciso }}</td>
+                <td>{{ grupo.principal }}</td>
                 <td>
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
                         <strong class="{% if grupo.is_recibido %}text-success{% else %}text-danger{% endif %}"> $
@@ -103,7 +108,7 @@
                             style="padding: 0.25rem 0.75rem; font-size: 0.875rem;">Gestionar</a>
                         {% else %}
                         <button class="btn btn-primary" style="padding: 0.25rem 0.75rem; font-size: 0.875rem;"
-                            hx-get="{% url 'finance:load_credit_history' %}?programa={{ grupo.programa.id }}&anio={{ grupo.anio }}&trimestre={{ grupo.trimestre }}&fuente={{ grupo.fuente.id }}&inciso={{ grupo.inciso }}&v=1"
+                            hx-get="{% url 'finance:load_credit_history' %}?programa={{ grupo.programa.id }}&anio={{ grupo.anio }}&trimestre={{ grupo.trimestre }}&fuente={{ grupo.fuente.id }}&inciso={{ grupo.inciso }}&principal={{ grupo.principal }}&v=1"
                             hx-target="#modal-container" hx-swap="innerHTML">Ver Opciones</button>
                         {% endif %}
                     </div>
@@ -224,4 +229,22 @@
         color: var(--danger);
     }
 </style>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('credit-search');
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                const filter = this.value.toLowerCase();
+                const table = document.getElementById('credits-table');
+                if (!table) return;
+                
+                const rows = table.querySelectorAll('tbody tr');
+                rows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(filter) ? '' : 'none';
+                });
+            });
+        }
+    });
+</script>
 {% endblock %}

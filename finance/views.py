@@ -69,10 +69,10 @@ def lista_creditos(request):
         elif group_by == 'inciso':
             key = (credito.inciso,)
         else: # default
-            key = (credito.programa.id, credito.anio, credito.trimestre, credito.fuente.id, credito.inciso)
+            key = (credito.programa.id, credito.anio, credito.trimestre, credito.fuente.id, credito.inciso, credito.principal)
             
         # Unique identifier for the "Annual Budget Line"
-        budget_key = (credito.programa.id, credito.fuente.id, credito.inciso, credito.anio)
+        budget_key = (credito.programa.id, credito.fuente.id, credito.inciso, credito.anio, credito.principal)
         
         # Only add to TOTAL if this budget line hasn't been counted for this group yet
         if budget_key not in grupos[key]['seen_budgets']:
@@ -104,6 +104,7 @@ def lista_creditos(request):
             grupos[key]['trimestre'] = credito.trimestre
             grupos[key]['fuente'] = credito.fuente
             grupos[key]['inciso'] = credito.inciso
+            grupos[key]['principal'] = credito.principal
     
     # Convert to list for template
     creditos_agrupados = []
@@ -129,6 +130,7 @@ def lista_creditos(request):
             item['trimestre'] = data['trimestre']
             item['fuente'] = data['fuente']
             item['inciso'] = data['inciso']
+            item['principal'] = data.get('principal', '')
             
         creditos_agrupados.append(item)
     
@@ -140,16 +142,16 @@ def lista_creditos(request):
     elif group_by == 'inciso':
         creditos_agrupados.sort(key=lambda x: x['inciso'])
     else:
-        creditos_agrupados.sort(key=lambda x: (x['anio'], x['trimestre'], str(x['programa']), x['inciso']))
+        creditos_agrupados.sort(key=lambda x: (x['anio'], x['trimestre'], str(x['programa']), x['inciso'], x['principal']))
     
     # Calculate Grand Total for display
     # Calculate Grand Total for display
-    # Logic: Sum 'monto_total' (Annual Ceiling) only ONCE per unique budget line (Program+Source+Inciso+Year)
+    # Logic: Sum 'monto_total' (Annual Ceiling) only ONCE per unique budget line (Program+Source+Inciso+Year+Principal)
     grand_total = 0
     seen_budgets_global = set()
     
     for credito in creditos:
-         budget_key = (credito.programa.id, credito.fuente.id, credito.inciso, credito.anio)
+         budget_key = (credito.programa.id, credito.fuente.id, credito.inciso, credito.anio, credito.principal)
          if budget_key not in seen_budgets_global:
              grand_total += credito.monto_total
              seen_budgets_global.add(budget_key)
@@ -171,17 +173,23 @@ def load_credit_history(request):
     trimestre = request.GET.get('trimestre')
     fuente_id = request.GET.get('fuente')
     inciso = request.GET.get('inciso')
+    principal = request.GET.get('principal')
     
     # Filter credits matching the criteria
-    creditos = Credito.objects.filter(
-        estado='VIGENTE',
-        programa_id=programa_id,
-        anio=anio,
-        trimestre=trimestre,
+    filters = {
+        'estado': 'VIGENTE',
+        'programa_id': programa_id,
+        'anio': anio,
+        'trimestre': trimestre,
+        'fuente_id': fuente_id,
+        'inciso': inciso
+    }
+    
+    # Only filter by principal if explicitly passed (handle mixed legacy calls if any, though usually strings)
+    if principal is not None:
+        filters['principal'] = principal
 
-        fuente_id=fuente_id,
-        inciso=inciso
-    ).order_by('-fecha_creacion')
+    creditos = Credito.objects.filter(**filters).order_by('-fecha_creacion')
 
     def fmt_currency(value):
         return f"{value:,.0f}".replace(",", "X").replace(".", ",").replace("X", ".")
@@ -254,6 +262,7 @@ def distribuir_credito(request, credito_id):
             monto = float(request.POST.get('monto', 0))
             solicitud_gfh = request.POST.get('solicitud_gfh', '')
             asignacion_gfh = request.POST.get('asignacion_gfh', '')
+            objeto = request.POST.get('objeto', '')
 
             if monto < 0:
                  raise ValueError("El monto asignado debe ser mayor a 0")
@@ -284,6 +293,7 @@ def distribuir_credito(request, credito_id):
                 asignacion.monto = monto
                 asignacion.solicitud_gfh = solicitud_gfh
                 asignacion.asignacion_gfh = asignacion_gfh
+                asignacion.objeto = objeto
                 asignacion.obra = obra
                 asignacion.save()
                 messages.success(request, f"Asignación actualizada exitosamente para {uucc.codigo}.")
@@ -296,6 +306,7 @@ def distribuir_credito(request, credito_id):
                     monto=monto,
                     solicitud_gfh=solicitud_gfh,
                     asignacion_gfh=asignacion_gfh,
+                    objeto=objeto,
                     trimestre=credito.trimestre, # Inherit from Credit
                     obra=obra
                 )
