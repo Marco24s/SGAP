@@ -269,9 +269,16 @@ def distribuir_credito(request, credito_id):
                  
             # Determine Clasificador based on Credit
             # Rule: We try to match the Credit's Inciso code to a ClasificadorGasto
-            clasificador = ClasificadorGasto.objects.filter(nivel=1, codigo=credito.inciso).first()
+            inciso_code = credito.inciso
+            
+            # Hotfix: Map '20' -> '2', '30' -> '3', etc. if they don't exist
+            mapping = {'20': '2', '30': '3', '40': '4', '50': '5', '10': '1'}
+            if inciso_code in mapping:
+                inciso_code = mapping[inciso_code]
+
+            clasificador = ClasificadorGasto.objects.filter(nivel=1, codigo=inciso_code).first()
             if not clasificador:
-                raise ValueError(f"No se encontró un Clasificador válido para el Inciso {credito.inciso}")
+                raise ValueError(f"No se encontró un Clasificador válido para el Inciso {credito.inciso} (Buscado: {inciso_code})")
 
             # Check Obstruction/Constraints (Inciso 4 requires Obra)
             obra = None

@@ -109,3 +109,8 @@ def home(request):
         ]
     }
     return render(request, 'dashboard/home.html', context)
+
+@login_required
+def bases_decision(request):
+    return render(request, 'dashboard/bases_decision.html')
+
