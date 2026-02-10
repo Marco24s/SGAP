@@ -340,3 +340,81 @@ tr:last-child td {
     border-color: var(--primary-blue);
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
+
+/* App Grid Styles (Migrated from landing page) */
+.apps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    justify-content: center;
+}
+
+.app-card {
+    background: white;
+    border-radius: 20px;
+    padding: 1.5rem 1.5rem;
+    text-decoration: none;
+    color: var(--text-main);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    border: 1px solid transparent;
+    position: relative;
+    overflow: hidden;
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+/* Dark mode adjustment for cards if bg-card is used, but landing used white. 
+   We keep it white as per original design or adapt to theme? 
+   The landing page forced white background on cards. 
+   We will strictly copy the landing page styles for consistency. 
+*/
+
+.app-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px -12px rgba(29, 78, 216, 0.25);
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+.icon-box {
+    width: 60px;
+    height: 60px;
+    background: #eff6ff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: var(--primary-blue);
+    margin-bottom: 0.25rem;
+    transition: all 0.3s ease;
+}
+
+.app-card:hover .icon-box {
+    background: var(--primary-blue);
+    color: white;
+    transform: scale(1.1) rotate(5deg);
+}
+
+.app-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0;
+    /* Ensure text color is correct for white card */
+    color: #1e293b; 
+}
+
+.app-desc {
+    font-size: 0.9rem;
+    color: #64748b; /* text-muted equivalent */
+    margin: 0;
+    line-height: 1.5;
+}

@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div style="padding: 2rem; text-align: center;">
+        <h2>{{ title }}</h2>
+        <p style="color: var(--text-muted); margin-top: 1rem;">
+            Esta funcionalidad está en desarrollo.
+        </p>
+        <div style="margin-top: 2rem;">
+            <a href="{% url 'core:landing' %}" class="btn">Volver al Inicio</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

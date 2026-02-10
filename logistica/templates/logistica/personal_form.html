@@ -1,0 +1,80 @@
+{% extends 'logistica/base_logistica.html' %}
+
+{% block page_title %}Alta de Personal{% endblock %}
+
+{% block logistica_content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Alta de Personal</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{% url 'logistica:personal_list' %}" class="btn btn-sm btn-outline-secondary">
+            Cancelar / Volver
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    {% if form.errors %}
+                        <div class="alert alert-danger">
+                            Por favor, corrija los errores indicados.
+                        </div>
+                    {% endif %}
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="{{ form.legajo.id_for_label }}" class="form-label">Legajo</label>
+                            {{ form.legajo }}
+                            {{ form.legajo.errors }}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="{{ form.grado.id_for_label }}" class="form-label">Grado</label>
+                            {{ form.grado }}
+                            {{ form.grado.errors }}
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="{{ form.apellido.id_for_label }}" class="form-label">Apellido</label>
+                            {{ form.apellido }}
+                            {{ form.apellido.errors }}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="{{ form.nombre.id_for_label }}" class="form-label">Nombre</label>
+                            {{ form.nombre }}
+                            {{ form.nombre.errors }}
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="{{ form.unidad.id_for_label }}" class="form-label">Unidad</label>
+                            {{ form.unidad }}
+                            {{ form.unidad.errors }}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="{{ form.rol.id_for_label }}" class="form-label">Rol</label>
+                            {{ form.rol }}
+                            {{ form.rol.errors }}
+                        </div>
+                    </div>
+
+                    <div class="mb-3 form-check">
+                        {{ form.estado }}
+                        <label class="form-check-label" for="{{ form.estado.id_for_label }}">Activo</label>
+                        {{ form.estado.errors }}
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Guardar Personal</button>
+                    <a href="{% url 'logistica:personal_list' %}" class="btn btn-secondary">Cancelar</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

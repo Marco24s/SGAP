@@ -204,3 +204,8 @@ def create_uucc(request):
         form = UnidadComponenteForm()
     
     return render(request, 'core/partials/create_uucc_modal.html', {'form': form})
+
+@login_required
+def construction_view(request, title="En Construcción"):
+    return render(request, 'core/construction.html', {'title': title})
+

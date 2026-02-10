@@ -1,17 +1,128 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="es">
 
-{% block page_title %}División Bases{% endblock %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>División Bases - S.G.A.P.</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        :root {
+            --primary-blue: #1d4ed8;
+            --primary-dark: #1e3a8a;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --bg-body: #f8fafc;
+        }
 
-{% block content %}
-<div class="card">
-    <div style="padding: 2rem; text-align: center;">
-        <h2>División Bases</h2>
-        <p style="color: var(--text-muted); margin-top: 1rem;">
-            Esta funcionalidad está en desarrollo.
-        </p>
-        <div style="margin-top: 2rem;">
-            <a href="{% url 'dashboard:home' %}" class="btn btn-secondary">Volver al Inicio</a>
+        body {
+            /* Override global dark theme */
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            /* text-align: center; Removed to allow different alignments if needed, but landing used it */
+            text-align: center;
+            min-height: 100vh;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            margin-top: 0;
+            letter-spacing: -1px;
+            color: var(--primary-dark);
+            text-transform: uppercase;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            display: block;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .logo {
+            font-size: 5rem;
+            margin-bottom: 0.25rem;
+            color: var(--primary-blue);
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+        }
+
+        /* Ensure cards look correct on light theme */
+        .app-card {
+            background: white;
+            color: #1e293b;
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+
+<body>
+    <a href="{% url 'core:landing' %}" class="btn-top-right">
+        <span>↪</span> Volver al Inicio
+    </a>
+
+    <div class="container" style="margin-top: 0vh;">
+        <header>
+            <div class="logo">
+                <img src="/static/img/logo_coan.png" alt="Logo COAN" style="max-width: 350px; height: auto;">
+            </div>
+            <!-- Modified Header for this section -->
+            <h1>División Bases</h1>
+            <h2>Herramientas para la toma de decisiones</h2>
+        </header>
+
+        <!-- Apps Grid -->
+        <div class="apps-grid">
+            <!-- Inciso 4 -->
+            <a href="{% url 'core:inciso_4' %}" class="app-card">
+                <div class="icon-box">
+                    🚜
+                </div>
+                <div class="app-title">Inciso 4</div>
+                <p class="app-desc">Gestión de Maquinaria y Equipos</p>
+            </a>
+
+            <!-- Infraestructura -->
+            <a href="{% url 'core:infraestructura' %}" class="app-card">
+                <div class="icon-box">
+                    🏢
+                </div>
+                <div class="app-title">Infraestructura</div>
+                <p class="app-desc">Mantenimiento y Obras</p>
+            </a>
+
+            <!-- Ropa de Trabajo -->
+            <a href="{% url 'core:ropa_trabajo' %}" class="app-card">
+                <div class="icon-box">
+                    👕
+                </div>
+                <div class="app-title">Ropa de Trabajo</div>
+                <p class="app-desc">Gestión de Indumentaria</p>
+            </a>
+
+            <!-- Equipo de Vuelo -->
+            <a href="{% url 'logistica:index' %}" class="app-card">
+                <div class="icon-box">
+                    🪖
+                </div>
+                <div class="app-title">Equipo de Vuelo</div>
+                <p class="app-desc">Equipamiento de Seguridad Aérea</p>
+            </a>
         </div>
+
     </div>
-</div>
-{% endblock %}
+</body>
+
+</html>

@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from . import auth_views
 
 app_name = 'core'
@@ -19,4 +19,11 @@ urlpatterns = [
     path('control/gasto/editar/<int:pk>/', views.gasto_edit, name='gasto_edit'),
     # UUCC Quick Add
     path('uucc/nuevo/', views.create_uucc, name='create_uucc'),
+    
+    # Placeholders
+    path('inciso-4/', views.construction_view, {'title': 'Inciso 4'}, name='inciso_4'),
+    path('infraestructura/', views.construction_view, {'title': 'Infraestructura'}, name='infraestructura'),
+    path('ropa-trabajo/', views.construction_view, {'title': 'Ropa de Trabajo'}, name='ropa_trabajo'),
+    path('equipo-vuelo/', views.construction_view, {'title': 'Equipo de Vuelo'}, name='equipo_vuelo'),
+
 ]

@@ -1,0 +1,79 @@
+{% extends 'logistica/base_logistica.html' %}
+
+{% block logistica_content %}
+<div class="card">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <div>
+            <h5 class="mb-0">Estado de Dotación</h5>
+            <small>Control de Equipamiento Obligatorio</small>
+        </div>
+        <div>
+            <a href="{% url 'logistica:tipo_prenda_list' %}" class="btn btn-light btn-sm text-primary fw-bold me-2">
+                <i class="bi bi-box-seam"></i> Gestionar Elementos
+            </a>
+            <a href="{% url 'logistica:dotacion_list' %}" class="btn btn-light btn-sm text-primary fw-bold">
+                <i class="bi bi-card-checklist"></i> Gestionar Reglas
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        {% if not reporte %}
+            <div class="alert alert-info">
+                No hay personal con requisitos de dotación definidos o no se han cargado reglas de dotación.
+                <br>
+                <small>Configure las reglas en el <a href="/admin/" target="_blank" class="alert-link">Panel de Administración (Dotación)</a>.</small>
+            </div>
+        {% else %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Personal</th>
+                            <th>Grado</th>
+                            <th>Rol</th>
+                            <th>Estado General</th>
+                            <th>Detalle de Equipamiento</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in reporte %}
+                        <tr>
+                            <td>
+                                <strong>{{ p.personal.apellido }}, {{ p.personal.nombre }}</strong>
+                                <br>
+                                <small class="text-muted">{{ p.personal.legajo }}</small>
+                            </td>
+                            <td>{{ p.personal.get_grado_display }}</td>
+                            <td>{{ p.personal.get_rol_display }}</td>
+                            <td>
+                                {% if p.todo_ok %}
+                                    <span class="badge bg-success">Completo</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Incompleto</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <ul class="list-group list-group-flush small">
+                                    {% for item in p.items %}
+                                        <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-1">
+                                            {{ item.tipo }}
+                                            <span>
+                                                {% if item.estado == 'ok' %}
+                                                    <span class="text-success checkbox-mark">✔</span>
+                                                {% else %}
+                                                    <span class="badge bg-danger rounded-pill">{{ item.asignado }} / {{ item.requerido }}</span>
+                                                {% endif %}
+                                            </span>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

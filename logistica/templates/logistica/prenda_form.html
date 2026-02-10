@@ -1,0 +1,72 @@
+{% extends 'logistica/base_logistica.html' %}
+
+{% block page_title %}Registrar Prenda{% endblock %}
+
+{% block logistica_content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Registrar Nueva Prenda</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{% url 'logistica:prenda_list' %}" class="btn btn-sm btn-outline-secondary">
+            Cancelar / Volver
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    {% if form.errors %}
+                        <div class="alert alert-danger">
+                            Corrija los errores abajo.
+                        </div>
+                    {% endif %}
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Código Interno</label>
+                            {{ form.codigo_interno }}
+                            {{ form.codigo_interno.errors }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Tipo</label>
+                            {{ form.tipo }}
+                            {{ form.tipo.errors }}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Descripción</label>
+                        {{ form.descripcion }}
+                        {{ form.descripcion.errors }}
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Talle</label>
+                            {{ form.talle }}
+                            {{ form.talle.errors }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Estado Inicial</label>
+                            {{ form.estado }}
+                            {{ form.estado.errors }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Vida Útil (Meses)</label>
+                            {{ form.vida_util_meses }}
+                            {{ form.vida_util_meses.errors }}
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-success">Registrar Prenda (Alta)</button>
+                    <a href="{% url 'logistica:prenda_list' %}" class="btn btn-secondary">Cancelar</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

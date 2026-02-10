@@ -22,4 +22,5 @@ urlpatterns = [
     path('', include('core.urls')), # This will now delegate to core.urls, which we need to update to handle ''
     path('dashboard/', include('dashboard.urls')), # MOVED dashboard to explicit path
     path('finance/', include('finance.urls')),
+    path('logistica/', include('logistica.urls')),
 ]

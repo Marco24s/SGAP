@@ -1,0 +1,57 @@
+{% extends 'logistica/base_logistica.html' %}
+
+{% block page_title %}Logística - Equipo de Vuelo{% endblock %}
+
+{% block logistica_content %}
+<div class="row">
+    <div class="col-md-3">
+        <div class="card text-center text-white bg-primary mb-3">
+            <div class="card-body">
+                <h3 class="card-title">{{ total_personal }}</h3>
+                <p class="card-text">Personal Activo</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center text-white bg-success mb-3">
+            <div class="card-body">
+                <h3 class="card-title">{{ total_prendas }}</h3>
+                <p class="card-text">Total Prendas</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center text-white bg-info mb-3">
+            <div class="card-body">
+                <h3 class="card-title">{{ prendas_disponibles }}</h3>
+                <p class="card-text">En Depósito</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center text-white bg-warning mb-3">
+            <div class="card-body">
+                <h3 class="card-title">{{ asignaciones_activas }}</h3>
+                <p class="card-text">Asignadas</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                Acciones Rápidas
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'logistica:asignacion_create' %}" class="btn btn-primary">Nueva Asignación</a>
+                    <a href="{% url 'logistica:prenda_create' %}" class="btn btn-success">Registrar Nueva Prenda</a>
+                    <a href="{% url 'logistica:personal_create' %}" class="btn btn-secondary">Alta de Personal</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'core',
     'finance',
     'dashboard',
+    'logistica',
 ]
 
 MIDDLEWARE = [

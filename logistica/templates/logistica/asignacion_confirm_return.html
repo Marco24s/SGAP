@@ -1,0 +1,35 @@
+{% extends 'logistica/base_logistica.html' %}
+
+{% block page_title %}Confirmar Devolución{% endblock %}
+
+{% block logistica_content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2 text-danger">Confirmar Devolución</h1>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                ¿Está seguro de procesar esta devolución?
+            </div>
+            <div class="card-body">
+                
+                <p><strong>Personal:</strong> {{ asignacion.personal }}</p>
+                <p><strong>Prenda:</strong> {{ asignacion.prenda }}</p>
+                <p><strong>Fecha Entrega original:</strong> {{ asignacion.fecha_entrega }}</p>
+                <hr>
+                <p class="text-muted">
+                    Al confirmar, se registrará la fecha de devolución actual, se dará de baja la asignación activa y la prenda volverá a estar "En Depósito".
+                </p>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Confirmar Devolución</button>
+                    <a href="{% url 'logistica:asignacion_list' %}" class="btn btn-secondary">Cancelar</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
