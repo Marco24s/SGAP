@@ -298,16 +298,12 @@ def estado_dotacion(request):
 
         for item_req in dotacion_requerida:
             # Count assigned items of this type
+            # Use explicit ID filtering for robustness
             asignados = Asignacion.objects.filter(
                 personal=persona,
                 activo=True,
-                prenda__tipo_prenda=item_req.tipo_prenda
+                prenda__tipo_prenda_id=item_req.tipo_prenda.id
             ).count()
-            if persona.apellido.lower() == 'zangara' and item_req.tipo_prenda.nombre.lower() == 'buzo de vuelo':
-                print(f"DEBUG ZANGARA: Req Type ID: {item_req.tipo_prenda.id}, Count: {asignados}")
-                all_asign = Asignacion.objects.filter(personal=persona, activo=True)
-                for a in all_asign:
-                    print(f"  - Asignacion: {a.id}, Prenda: {a.prenda.id}, PrendaType: {a.prenda.tipo_prenda.id if a.prenda.tipo_prenda else 'None'}")
 
             estado_item = {
                 'tipo': item_req.tipo_prenda.nombre,

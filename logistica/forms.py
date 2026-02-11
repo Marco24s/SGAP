@@ -50,6 +50,10 @@ class PrendaForm(forms.ModelForm):
             'estado': forms.Select(attrs={'class': 'form-select'}),
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['tipo_prenda'].required = True
+
 class AsignacionForm(forms.ModelForm):
     class Meta:
         model = Asignacion
