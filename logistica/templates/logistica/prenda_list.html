@@ -21,7 +21,7 @@
                 <th>Descripción</th>
                 <th>Talle</th>
                 <th>Estado</th>
-                <th>Vida Útil (meses)</th>
+
                 <th>Acciones</th>
             </tr>
         </thead>
@@ -37,14 +37,14 @@
                         {{ item.get_estado_display }}
                     </span>
                 </td>
-                <td>{{ item.vida_util_meses }}</td>
+
                 <td>
                     <a href="{% url 'logistica:prenda_update' item.pk %}" class="btn btn-sm btn-outline-secondary">Editar</a>
                 </td>
             </tr>
             {% empty %}
             <tr>
-                <td colspan="7" class="text-center">No hay prendas registradas.</td>
+                <td colspan="6" class="text-center">No hay prendas registradas.</td>
             </tr>
             {% endfor %}
         </tbody>

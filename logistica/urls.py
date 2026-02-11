@@ -29,9 +29,11 @@ urlpatterns = [
     path('tipos_prenda/', views.tipo_prenda_list, name='tipo_prenda_list'),
     path('tipos_prenda/crear/', views.tipo_prenda_create, name='tipo_prenda_create'),
     path('tipos_prenda/<int:pk>/editar/', views.tipo_prenda_update, name='tipo_prenda_update'),
+    path('tipos_prenda/<int:pk>/eliminar/', views.tipo_prenda_delete, name='tipo_prenda_delete'),
 
     # Gestion Reglas Dotacion
     path('dotacion/reglas/', views.dotacion_list, name='dotacion_list'),
     path('dotacion/reglas/crear/', views.dotacion_create, name='dotacion_create'),
     path('dotacion/reglas/<int:pk>/editar/', views.dotacion_update, name='dotacion_update'),
+    path('dotacion/reglas/<int:pk>/eliminar/', views.dotacion_delete, name='dotacion_delete'),
 ]

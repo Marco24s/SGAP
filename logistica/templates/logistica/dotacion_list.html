@@ -28,9 +28,17 @@
                         <td>{{ dotacion.cantidad }}</td>
                         <td>{{ dotacion.renovacion_int }}</td>
                         <td>
-                            <a href="{% url 'logistica:dotacion_update' dotacion.pk %}" class="btn btn-sm btn-outline-primary">
-                                <i class="bi bi-pencil"></i>
-                            </a>
+                            <div class="d-flex gap-2">
+                                <a href="{% url 'logistica:dotacion_update' dotacion.pk %}" class="btn btn-sm btn-outline-primary" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form method="post" action="{% url 'logistica:dotacion_delete' dotacion.pk %}" onsubmit="return confirm('¿Está seguro de eliminar esta regla de dotación?');" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                     {% empty %}

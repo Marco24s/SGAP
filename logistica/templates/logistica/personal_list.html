@@ -5,24 +5,184 @@
 {% block logistica_content %}
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2">Personal</h1>
-    <div class="btn-toolbar mb-2 mb-md-0">
+    
+    <div class="btn-toolbar mb-2 mb-md-0 gap-2">
+        <form method="get" class="d-flex align-items-center gap-2" id="filterForm">
+            <!-- Preserve Role Filter if exists -->
+            {% if rol_filtro %}
+            <input type="hidden" name="rol" value="{{ rol_filtro }}">
+            {% endif %}
+
+            <!-- Filter Type Selector -->
+            <select name="filter_type" id="filterType" class="form-select form-select-sm bg-dark text-white border-secondary" style="width: auto;" onchange="updateFilterOptions()">
+                <option value="">Filtrar por...</option>
+                <option value="unidad" {% if filter_type == 'unidad' %}selected{% endif %}>Unidad / Destino</option>
+                <option value="jerarquia" {% if filter_type == 'jerarquia' %}selected{% endif %}>Jerarquía</option>
+                <option value="grado" {% if filter_type == 'grado' %}selected{% endif %}>Grado</option>
+            </select>
+
+            <!-- Filter Value Selector -->
+            <select name="filter_value" id="filterValue" class="form-select form-select-sm bg-dark text-white border-secondary" style="width: auto; min-width: 200px;" onchange="this.form.submit()" disabled>
+                <option value="">Seleccione una opción...</option>
+            </select>
+            
+            {% if filter_type %}
+                <a href="{% url 'logistica:personal_list' %}{% if rol_filtro %}?rol={{ rol_filtro }}{% endif %}" class="btn btn-sm btn-outline-secondary" title="Limpiar Filtros"><i class="bi bi-x-lg"></i></a>
+            {% endif %}
+        </form>
+
         <a href="{% url 'logistica:personal_create' %}" class="btn btn-sm btn-outline-primary">
             Nuevo Personal
         </a>
     </div>
 </div>
 
+<script>
+    // Data from Django Context
+    const unidadesData = [
+        {% for u in unidades %}"{{ u }}",{% endfor %}
+    ];
+    
+    const jerarquiasData = [
+        {% for j in jerarquias %}"{{ j }}",{% endfor %}
+    ];
+
+    const gradosData = [
+        {% for codigo, nombre in grados %}{code: "{{ codigo }}", name: "{{ nombre }}"},{% endfor %}
+    ];
+    
+    const currentFilterType = "{{ filter_type|default:'' }}";
+    const currentFilterValue = "{{ filter_value|default:'' }}";
+
+    function updateFilterOptions() {
+        const typeSelect = document.getElementById('filterType');
+        const valueSelect = document.getElementById('filterValue');
+        const selectedType = typeSelect.value;
+        
+        // Reset options
+        valueSelect.innerHTML = '<option value="">Seleccione una opción...</option>';
+        valueSelect.disabled = false;
+        
+        if (selectedType === 'unidad') {
+            unidadesData.forEach(unit => {
+                const option = document.createElement('option');
+                option.value = unit;
+                option.text = unit;
+                if (currentFilterType === 'unidad' && currentFilterValue === unit) {
+                    option.selected = true;
+                }
+                valueSelect.appendChild(option);
+            });
+        } else if (selectedType === 'jerarquia') {
+            jerarquiasData.forEach(jerarquia => {
+                const option = document.createElement('option');
+                option.value = jerarquia;
+                option.text = jerarquia;
+                if (currentFilterType === 'jerarquia' && currentFilterValue === jerarquia) {
+                    option.selected = true;
+                }
+                valueSelect.appendChild(option);
+            });
+        } else if (selectedType === 'grado') {
+            gradosData.forEach(grado => {
+                const option = document.createElement('option');
+                option.value = grado.code;
+                option.text = `${grado.name} (${grado.code})`;
+                if (currentFilterType === 'grado' && currentFilterValue === grado.code) {
+                    option.selected = true;
+                }
+                valueSelect.appendChild(option);
+            });
+        } else {
+            valueSelect.disabled = true;
+            valueSelect.innerHTML = '<option value="">---</option>';
+        }
+    }
+
+    // Initialize on load
+    document.addEventListener('DOMContentLoaded', function() {
+        if (currentFilterType) {
+            updateFilterOptions();
+        }
+    });
+</script>
+
 <div class="table-responsive">
     <table class="table table-striped table-sm">
         <thead>
             <tr>
-                <th>Legajo</th>
-                <th>Grado</th>
-                <th>Apellido y Nombre</th>
-                <th>Unidad</th>
-                <th>Rol</th>
-                <th>Estado</th>
-                <th>Acciones</th>
+                {% with sort_url="?filter_type="|add:filter_type|add:"&filter_value="|add:filter_value|add:"&rol="|add:rol_filtro %}
+                
+                <!-- Legajo -->
+                <th scope="col">
+                    <a href="{{ sort_url }}&order_by=legajo&direction={% if order_by == 'legajo' and direction == 'asc' %}desc{% else %}asc{% endif %}" class="text-decoration-none text-white d-flex align-items-center gap-1" style="color: white !important;">
+                        Legajo
+                        {% if order_by == 'legajo' %}
+                            <i class="bi {% if direction == 'asc' %}bi-sort-numeric-down{% else %}bi-sort-numeric-up-alt{% endif %}"></i>
+                        {% else %}
+                            <i class="bi bi-arrow-down-up text-white-50 opacity-50" style="font-size: 0.8em;"></i>
+                        {% endif %}
+                    </a>
+                </th>
+                
+                <!-- Grado -->
+                <th scope="col">
+                    <a href="{{ sort_url }}&order_by=grado&direction={% if order_by == 'grado' and direction == 'asc' %}desc{% else %}asc{% endif %}" class="text-decoration-none text-white d-flex align-items-center gap-1" style="color: white !important;">
+                        Grado
+                        {% if order_by == 'grado' %}
+                            <i class="bi {% if direction == 'asc' %}bi-sort-alpha-down{% else %}bi-sort-alpha-up-alt{% endif %}"></i>
+                        {% else %}
+                            <i class="bi bi-arrow-down-up text-white-50 opacity-50" style="font-size: 0.8em;"></i>
+                        {% endif %}
+                    </a>
+                </th>
+                
+                <th scope="col">
+                    <a href="{{ sort_url }}&order_by=apellido&direction={% if order_by == 'apellido' and direction == 'asc' %}desc{% else %}asc{% endif %}" class="text-decoration-none text-white d-flex align-items-center gap-1" style="color: white !important;">
+                        Apellido y Nombre
+                        {% if order_by == 'apellido' %}
+                            <i class="bi {% if direction == 'asc' %}bi-sort-alpha-down{% else %}bi-sort-alpha-up-alt{% endif %}"></i>
+                        {% else %}
+                            <i class="bi bi-arrow-down-up text-white-50 opacity-50" style="font-size: 0.8em;"></i>
+                        {% endif %}
+                    </a>
+                </th>
+
+                <th scope="col">
+                    <a href="{{ sort_url }}&order_by=unidad&direction={% if order_by == 'unidad' and direction == 'asc' %}desc{% else %}asc{% endif %}" class="text-decoration-none text-white d-flex align-items-center gap-1" style="color: white !important;">
+                        Unidad
+                        {% if order_by == 'unidad' %}
+                            <i class="bi {% if direction == 'asc' %}bi-sort-alpha-down{% else %}bi-sort-alpha-up-alt{% endif %}"></i>
+                        {% else %}
+                            <i class="bi bi-arrow-down-up text-white-50 opacity-50" style="font-size: 0.8em;"></i>
+                        {% endif %}
+                    </a>
+                </th>
+
+                <th scope="col">
+                    <a href="{{ sort_url }}&order_by=rol&direction={% if order_by == 'rol' and direction == 'asc' %}desc{% else %}asc{% endif %}" class="text-decoration-none text-white d-flex align-items-center gap-1" style="color: white !important;">
+                        Rol
+                        {% if order_by == 'rol' %}
+                            <i class="bi {% if direction == 'asc' %}bi-sort-alpha-down{% else %}bi-sort-alpha-up-alt{% endif %}"></i>
+                        {% else %}
+                            <i class="bi bi-arrow-down-up text-white-50 opacity-50" style="font-size: 0.8em;"></i>
+                        {% endif %}
+                    </a>
+                </th>
+
+                <th scope="col">
+                    <a href="{{ sort_url }}&order_by=estado&direction={% if order_by == 'estado' and direction == 'asc' %}desc{% else %}asc{% endif %}" class="text-decoration-none text-white d-flex align-items-center gap-1" style="color: white !important;">
+                        Estado
+                        {% if order_by == 'estado' %}
+                            <i class="bi {% if direction == 'asc' %}bi-sort-down{% else %}bi-sort-up-alt{% endif %}"></i>
+                        {% else %}
+                            <i class="bi bi-arrow-down-up text-white-50 opacity-50" style="font-size: 0.8em;"></i>
+                        {% endif %}
+                    </a>
+                </th>
+
+                <th scope="col" class="text-white">Acciones</th>
+                {% endwith %}
             </tr>
         </thead>
         <tbody>

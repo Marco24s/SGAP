@@ -26,9 +26,17 @@
                         <td>{{ tipo.get_categoria_display }}</td>
                         <td>{{ tipo.vida_util_sugerida }}</td>
                         <td>
-                            <a href="{% url 'logistica:tipo_prenda_update' tipo.pk %}" class="btn btn-sm btn-outline-primary">
-                                <i class="bi bi-pencil"></i>
-                            </a>
+                            <div class="d-flex gap-2">
+                                <a href="{% url 'logistica:tipo_prenda_update' tipo.pk %}" class="btn btn-sm btn-outline-primary" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form method="post" action="{% url 'logistica:tipo_prenda_delete' tipo.pk %}" onsubmit="return confirm('¿Está seguro de eliminar este tipo de prenda?');" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                     {% empty %}
