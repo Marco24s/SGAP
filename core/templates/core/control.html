@@ -8,21 +8,24 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-blue: #1d4ed8;
-            --primary-dark: #1e3a8a;
-            --secondary-blue: #3b82f6;
-            --text-main: #1e293b;
-            --bg-body: #f1f5f9;
-            --card-bg: #ffffff;
-            --border-color: #e2e8f0;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --primary-blue: var(--primary);
+            --primary-dark: var(--primary-hover);
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --bg-body: #0a0f1d;
+            --card-bg: #161c2d;
+            --border-color: rgba(255, 255, 255, 0.08);
             --success: #10b981;
             --danger: #ef4444;
             --warning: #f59e0b;
         }
 
         body {
-            font-family: 'Montserrat', sans-serif;
+            font-family: 'Inter', 'Montserrat', sans-serif;
             background-color: var(--bg-body);
+            background-image: radial-gradient(circle at top right, rgba(37, 99, 235, 0.05), transparent 40%);
             color: var(--text-main);
             margin: 0;
             padding: 2rem;
@@ -36,105 +39,33 @@
             margin-bottom: 2rem;
         }
 
-        h1 {
-            color: var(--primary-dark);
+        .header h1 {
+            color: white;
             margin: 0;
-            font-size: 2rem;
+            font-size: 2.25rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
         }
 
         .back-btn {
-            padding: 0.5rem 1rem;
-            background-color: var(--primary-blue);
-            color: white;
+            padding: 0.6rem 1.25rem;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
             text-decoration: none;
             border-radius: 0.5rem;
             font-weight: 600;
-            transition: background-color 0.2s;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .back-btn:hover {
-            background-color: var(--primary-dark);
-        }
-
-        /* Dashboard Grid */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-        }
-
-        .card {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid var(--border-color);
-        }
-
-        .card-title {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--primary-dark);
-        }
-
-        /* Tables */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.9rem;
-        }
-
-        th,
-        td {
-            text-align: left;
-            padding: 0.75rem 0.5rem;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        th {
-            font-weight: 600;
-            color: var(--text-main);
-            background-color: #f8fafc;
-        }
-
-        td {
-            color: #475569;
-        }
-
-        tr:last-child td {
-            border-bottom: none;
-        }
-
-        .amount {
-            font-family: 'Courier New', monospace;
-            text-align: right;
-            font-weight: 600;
-        }
-
-        .total-row {
-            font-weight: 700;
-            background-color: #eff6ff;
-            border-top: 2px solid var(--primary-blue);
-        }
-
-        .total-row td {
-            color: var(--primary-dark);
-        }
-
-        .negative {
-            color: var(--danger);
-        }
-
-        .positive {
-            color: var(--success);
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            transform: translateX(-4px);
         }
 
         /* KPI Cards */
@@ -142,29 +73,48 @@
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 1.5rem;
-            margin-bottom: 2rem;
+            margin-bottom: 2.5rem;
         }
 
         .kpi-card {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 12px;
-            border-left: 5px solid var(--primary-blue);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            background: var(--card-bg);
+            padding: 1.75rem;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .kpi-card::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--accent);
         }
 
         .kpi-label {
-            font-size: 0.875rem;
-            color: #64748b;
+            font-size: 0.8rem;
+            color: var(--text-muted);
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.1em;
+            font-weight: 700;
         }
 
         .kpi-value {
-            font-size: 1.75rem;
+            font-size: 2rem;
             font-weight: 800;
-            color: var(--text-main);
-            margin-top: 0.5rem;
+            color: white;
+            margin-top: 0.75rem;
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
         }
 
         @media (max-width: 1024px) {

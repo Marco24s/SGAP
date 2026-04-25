@@ -1,0 +1,185 @@
+{% extends 'logistica/base_logistica.html' %}
+{% load static %}
+
+{% block page_title %}Necesidades de Compra{% endblock %}
+
+{% block logistica_content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Predicción de Necesidades de Compra</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="window.print()">
+                <i class="bi bi-printer"></i> Imprimir Reporte
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-primary">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">Resumen de Compras - Año {{ anio_proximo }} (y faltantes actuales)</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Tipo de Prenda</th>
+                                {% for talle in sorted_talles %}
+                                <th class="text-center">{{ talle }}</th>
+                                {% endfor %}
+                                <th class="text-center table-primary">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in pivot_rows %}
+                            <tr>
+                                <td class="fw-bold">
+                                    <a href="#" class="text-decoration-none people-trigger" style="color: #0dcaf0 !important;"
+                                       data-bs-toggle="modal" 
+                                       data-bs-target="#detailModal" 
+                                       data-title="{{ row.tipo }} (Todos)" 
+                                        data-people="{{ row.total_people|join:'|' }}">
+                                        {{ row.tipo }}
+                                    </a>
+                                </td>
+                                {% for cell in row.counts %}
+                                <td class="text-center">
+                                    {% if cell.count != '-' %}
+                                        <a href="#" class="text-decoration-none fw-bold people-trigger" style="color: #0dcaf0 !important;"
+                                           data-bs-toggle="modal"
+                                           data-bs-target="#detailModal"
+                                           data-title="{{ row.tipo }} - Talle {{ cell.talle }}"
+                                           data-people="{{ cell.people|join:'|' }}">
+                                            {{ cell.count }}
+                                        </a>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                {% endfor %}
+                                <td class="text-center table-primary fw-bold">{{ row.total }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="100%" class="text-center text-muted">No se detectaron necesidades de compra próximas.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Details -->
+<div class="modal fade" id="detailModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-light">
+        <h5 class="modal-title" id="detailModalTitle">Detalle de Personal</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <ul class="list-group list-group-flush" id="detailModalList">
+            <!-- Content populated via JS -->
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var detailModal = document.getElementById('detailModal');
+        detailModal.addEventListener('show.bs.modal', function (event) {
+            // Button that triggered the modal
+            var button = event.relatedTarget;
+            // Extract info from data-* attributes
+            var title = button.getAttribute('data-title');
+            var peopleStr = button.getAttribute('data-people');
+            
+            // Update the modal's content.
+            var modalTitle = detailModal.querySelector('.modal-title');
+            var modalList = detailModal.querySelector('#detailModalList');
+            
+            modalTitle.textContent = title;
+            modalList.innerHTML = ''; // Clear previous
+            
+            if (peopleStr) {
+                var people = peopleStr.split('|');
+                people.forEach(function(person) {
+                    var li = document.createElement('li');
+                    li.className = 'list-group-item';
+                    li.textContent = person;
+                    modalList.appendChild(li);
+                });
+            } else {
+                var li = document.createElement('li');
+                li.className = 'list-group-item text-muted';
+                li.textContent = 'Sin información disponible.';
+                modalList.appendChild(li);
+            }
+        });
+    });
+</script>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center" style="cursor: pointer;"
+                 data-bs-toggle="collapse" 
+                 data-bs-target="#collapsePersonalDetail" 
+                 aria-expanded="false" 
+                 aria-controls="collapsePersonalDetail">
+                <h5 class="card-title mb-0">Detalle por Personal</h5>
+                <i class="bi bi-chevron-down"></i>
+            </div>
+            <div class="collapse" id="collapsePersonalDetail">
+                <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm text-center">
+                        <thead>
+                            <tr>
+                                <th>Personal</th>
+                                <th>Prenda</th>
+                                <th>Talle</th>
+                                <th>Motivo</th>
+                                <th>Fecha Vencimiento</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for nec in necesidades_detalle %}
+                            <tr>
+                                <td class="text-start">{{ nec.personal }}</td>
+                                <td>{{ nec.tipo }}</td>
+                                <td>{{ nec.talle }}</td>
+                                <td>
+                                    {% if nec.motivo == 'Faltante' %}
+                                    <span class="badge bg-danger">Faltante</span>
+                                    {% else %}
+                                    <span class="badge bg-warning text-dark">Vencimiento</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ nec.fecha_limite|date:"d/m/Y" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">Sin novedades.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

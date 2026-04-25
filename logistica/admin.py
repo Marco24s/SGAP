@@ -14,8 +14,8 @@ class DotacionAdmin(admin.ModelAdmin):
 
 @admin.register(Personal)
 class PersonalAdmin(admin.ModelAdmin):
-    list_display = ('legajo', 'grado', 'apellido', 'nombre', 'rol', 'estado')
-    search_fields = ('legajo', 'apellido', 'nombre')
+    list_display = ('legajo', 'grado', 'apellido', 'nombre', 'rol', 'talle_casco', 'talle_guantes', 'talle_overall', 'talle_botas', 'estado')
+    search_fields = ('legajo', 'apellido', 'nombre', 'talle_casco', 'talle_guantes', 'talle_overall', 'talle_botas')
     list_filter = ('grado', 'rol', 'estado')
 
 @admin.register(Prenda)

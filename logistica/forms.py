@@ -4,13 +4,17 @@ from .models import Personal, Prenda, Asignacion, TipoPrenda, Dotacion
 class PersonalForm(forms.ModelForm):
     class Meta:
         model = Personal
-        fields = ['legajo', 'apellido', 'nombre', 'grado', 'unidad', 'rol', 'estado']
+        fields = ['legajo', 'apellido', 'nombre', 'grado', 'unidad', 'rol', 'talle_casco', 'talle_guantes', 'talle_overall', 'talle_botas', 'estado']
         widgets = {
             'legajo': forms.NumberInput(attrs={'class': 'form-control'}),
             'apellido': forms.TextInput(attrs={'class': 'form-control'}),
             'nombre': forms.TextInput(attrs={'class': 'form-control'}),
             'grado': forms.Select(attrs={'class': 'form-select'}),
             'rol': forms.Select(attrs={'class': 'form-select'}),
+            'talle_casco': forms.TextInput(attrs={'class': 'form-control'}),
+            'talle_guantes': forms.TextInput(attrs={'class': 'form-control'}),
+            'talle_overall': forms.TextInput(attrs={'class': 'form-control'}),
+            'talle_botas': forms.TextInput(attrs={'class': 'form-control'}),
             'estado': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 

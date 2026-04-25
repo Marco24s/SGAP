@@ -14,7 +14,7 @@ class EstructuraProgramatica(models.Model):
     padre = models.ForeignKey("self", null=True, blank=True, on_delete=models.CASCADE, related_name="hijos")
 
     def __str__(self):
-        return f"{self.get_nivel_display()} {self.codigo} - {self.descripcion}"
+        return f"{self.codigo} - {self.descripcion}"
 
 class UnidadComponente(models.Model):
     nombre = models.CharField(max_length=255)

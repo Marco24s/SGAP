@@ -3,7 +3,7 @@
 {% block page_title %}Recepción de Crédito (Nuevo Techo){% endblock %}
 
 {% block content %}
-<div class="card" style="max-width: 600px; margin: 0 auto;">
+<div class="card" style="max-width: 800px; margin: 0 auto;">
     <div style="margin-bottom: 2rem;">
         <h2 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">Cargar Nuevo Crédito Presupuestario
         </h2>
@@ -15,29 +15,43 @@
         {% csrf_token %}
         <div style="display: grid; gap: 1.5rem;">
 
-            <div>
-                <label style="display: block; margin-bottom: 0.5rem;">Tipo de Crédito</label>
-                {{ form.tipo_credito }}
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; align-items: start;">
                 <div>
                     <label style="display: block; margin-bottom: 0.5rem;">Año Fiscal</label>
                     {{ form.anio }}
                 </div>
                 <div>
-                    <label style="display: block; margin-bottom: 0.5rem;">Trimestre</label>
-                    {{ form.trimestre }}
+                     <label style="display: block; margin-bottom: 0.5rem;">Tipo de Crédito</label>
+                     {{ form.tipo_credito }}
                 </div>
-                <div>
-                    <label style="display: block; margin-bottom: 0.5rem;">Cuota (Dinero Ingresado)</label>
-                    <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        {{ form.monto_cuota }}
-                        <div style="display: flex; align-items: center; gap: 0.25rem;">
-                            {{ form.recibido }}
-                            <small>¿Recibido?</small>
+            </div>
+
+            <!-- Quarterly Installments Section -->
+            <div style="background: rgba(255, 255, 255, 0.03); padding: 1.5rem; border-radius: 0.75rem; border: 1px solid var(--border-light); margin-bottom: 0.5rem;">
+                <label style="display: block; margin-bottom: 1rem; font-weight: 600; color: var(--primary-blue);">Desglose por Trimestre</label>
+                
+                <div style="display: grid; gap: 1rem;">
+                    {% for t in "1234" %}
+                    <div style="display: grid; grid-template-columns: 120px 1fr 120px; align-items: center; gap: 1.5rem; padding: 0.5rem; border-radius: 0.5rem;" class="trimestre-row">
+                        <span style="font-weight: 500;">{{ t }}° Trimestre</span>
+                        <input type="text" name="monto_t{{ t }}" class="form-input form-input-large monto-cuota-input" placeholder="$ 0" autocomplete="off">
+                        <div style="display: flex; align-items: center; gap: 0.5rem; justify-content: flex-end;">
+                            <input type="checkbox" name="recibido_t{{ t }}" class="form-checkbox" style="width: 1.25rem; height: 1.25rem;">
+                            <small style="font-size: 0.7rem; color: var(--text-muted);">¿Recibido?</small>
                         </div>
                     </div>
+                    {% endfor %}
+                </div>
+
+                <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-weight: 700; font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted);">Techo Total Anual</span>
+                    <div style="display: flex; align-items: baseline; gap: 0.5rem;">
+                        <span style="font-size: 1.5rem; font-weight: 700; color: var(--success);">$</span>
+                        <input type="text" id="monto-total-display" class="form-input" 
+                               style="width: 250px; background: transparent; border: none; text-align: right; pointer-events: none; color: var(--success); font-size: 1.5rem; font-weight: 800; padding: 0;" 
+                               value="0" readonly>
+                    </div>
+                    <input type="hidden" name="monto_total_hidden" id="monto-total-hidden" value="0">
                 </div>
             </div>
 
@@ -233,35 +247,31 @@
                     }
                 }
 
+                // Calculation Logic
                 document.addEventListener('DOMContentLoaded', function() {
-                    function formatNumber(input) {
-                        let value = input.value.replace(/\D/g, ''); // Remove all non-digits
-                        value = value.replace(/\B(?=(\d{3})+(?!\d))/g, "."); // Add dots
-                        input.value = value;
-                    }
-
-                    const montoCuota = document.getElementById('id_monto_cuota');
-                    const montoTotal = document.getElementById('id_monto_total');
+                    const inputs = document.querySelectorAll('.monto-cuota-input');
+                    const totalDisplay = document.getElementById('monto-total-display');
+                    const totalHidden = document.getElementById('monto-total-hidden');
                     const form = document.querySelector('form');
 
-                    if (montoCuota) {
-                        montoCuota.addEventListener('input', function() { formatNumber(this); });
-                        // Initial format if value exists
-                        formatNumber(montoCuota);
-                    }
-                    if (montoTotal) {
-                        montoTotal.addEventListener('input', function() { formatNumber(this); });
-                        // Initial format if value exists
-                        formatNumber(montoTotal);
+                    function updateTotals() {
+                        let total = 0;
+                        inputs.forEach(input => {
+                            let val = input.value.replace(/\./g, '');
+                            if (val && !isNaN(val)) total += parseInt(val);
+                        });
+                        totalDisplay.value = total.toLocaleString('de-DE');
+                        totalHidden.value = total;
                     }
 
-                    form.addEventListener('submit', function(e) {
-                         if (montoCuota) {
-                            montoCuota.value = montoCuota.value.replace(/\./g, '');
-                         }
-                         if (montoTotal) {
-                            montoTotal.value = montoTotal.value.replace(/\./g, '');
-                         }
+                    inputs.forEach(input => {
+                        input.addEventListener('input', function() {
+                            let value = this.value.replace(/\D/g, '');
+                            if (value) {
+                                this.value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+                            }
+                            updateTotals();
+                        });
                     });
                 });
             </script>
@@ -282,15 +292,12 @@
                 </div>
             </div>
 
-            <div>
-                <label style="display: block; margin-bottom: 0.5rem;">Tarea Plana (Techo)</label>
-                {{ form.monto_total }}
-            </div>
-
             <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1rem;">
                 <a href="{% url 'finance:lista_creditos' %}" class="btn"
-                    style="color: white; text-decoration: none;">Cancelar</a>
-                <button type="submit" class="btn btn-primary">Guardar Crédito</button>
+                    style="color: var(--text-muted); text-decoration: none;">Cancelar</a>
+                <button type="submit" class="btn btn-primary" style="padding: 0.75rem 2.5rem; font-size: 1rem;">
+                    Confirmar Carga Anual
+                </button>
             </div>
         </div>
     </form>

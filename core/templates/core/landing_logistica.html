@@ -5,120 +5,109 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Departamento Logística - COAN</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <style>
-        :root {
-            --primary-blue: #1d4ed8;
-            --primary-dark: #1e3a8a;
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-            --bg-body: #f8fafc;
+        .hero-section {
+            padding: 4rem 1rem 2rem 1rem;
+            max-width: 800px;
+            margin: 0 auto;
         }
 
-        body {
-            /* Override global dark theme */
-            background-color: var(--bg-body);
-            color: var(--text-main);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            min-height: 100vh;
+        .logo-main {
+            max-width: 280px;
+            height: auto;
+            margin-bottom: 2rem;
+            filter: drop-shadow(0 0 20px rgba(37, 99, 235, 0.2));
+            transition: transform 0.3s ease;
         }
 
-        h1 {
-            font-size: 2.5rem;
+        .logo-main:hover {
+            transform: scale(1.05);
+        }
+
+        .header-main h1 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 3.5rem;
             font-weight: 800;
-            margin-bottom: 0.5rem;
-            margin-top: 0;
-            letter-spacing: -1px;
-            color: var(--primary-dark);
+            margin: 0;
+            background: linear-gradient(to bottom, #ffffff 30%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -2px;
             text-transform: uppercase;
         }
 
-        h2 {
-            font-size: 1.5rem;
+        .header-main h2 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.25rem;
             font-weight: 500;
             color: var(--text-muted);
-            margin-bottom: 3rem;
-            padding-bottom: 2rem;
-            display: block;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        
-        .logo {
-            font-size: 5rem;
-            margin-bottom: 0.25rem;
-            color: var(--primary-blue);
-            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+            margin: 1rem 0 3rem 0;
+            letter-spacing: 4px;
+            text-transform: uppercase;
         }
 
-        /* Ensure cards look correct on light theme if style.css optimized them for dark */
-        .app-card {
-            background: white;
-            color: #1e293b;
-            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.1);
+        .decorative-line {
+            width: 80px;
+            height: 4px;
+            background: var(--primary);
+            margin: 0 auto 3rem auto;
+            border-radius: 2px;
+        }
+
+        @media (max-width: 768px) {
+            .header-main h1 { font-size: 2.5rem; }
+            .header-main h2 { font-size: 1rem; }
         }
     </style>
 </head>
 
 <body>
     <a href="{% url 'core:logout' %}" class="btn-top-right">
-        <span>↪</span> Cerrar Sesión
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+        </svg>
+        Cerrar Sesión
     </a>
 
-    <div class="container" style="margin-top: 0vh;"> <!-- Reset visual shift -->
-        <header>
+    <div class="container hero-section">
+        <header class="header-main">
             <div class="logo">
-                <img src="/static/img/logo_coan.png" alt="Logo COAN" style="max-width: 350px; height: auto;">
+                <img src="{% static 'img/logo_coan.png' %}" alt="Logo COAN" class="logo-main">
             </div>
             <h1>Comando de Aviación Naval</h1>
-            <h2>Sistema de Gestión Departamento Logística</h2>
+            <h2>Gestión Departamento Logística</h2>
+            <div class="decorative-line"></div>
         </header>
 
         <!-- Apps Grid -->
         <div class="apps-grid">
             <a href="/dashboard/" class="app-card">
-                <div class="icon-box">
-                    ✈️
-                </div>
-                <div class="app-title">Ingresar al S.G.A.P.</div>
-                <p class="app-desc">Sistema de Gestión Aérea y Presupuestaria del COAN</p>
+                <div class="icon-box">✈️</div>
+                <div class="app-title">Portal S.G.A.P.</div>
+                <p class="app-desc">Acceso al Sistema de Gestión Aérea y Presupuestaria del COAN</p>
             </a>
 
             <a href="{% url 'core:control' %}" class="app-card">
-                <div class="icon-box">
-                    🛠️
-                </div>
-                <div class="app-title">Control</div>
-                <p class="app-desc">Panel de administración y herramientas</p>
+                <div class="icon-box">🛠️</div>
+                <div class="app-title">Control Operativo</div>
+                <p class="app-desc">Panel de herramientas, incisos y gastos operativos de la división</p>
             </a>
 
             <a href="{% url 'dashboard:bases_decision' %}" class="app-card">
-                <div class="icon-box">
-                    📊
-                </div>
+                <div class="icon-box">📊</div>
                 <div class="app-title">División Bases</div>
-                <p class="app-desc">Herramientas para la toma de decisiones</p>
+                <p class="app-desc">Inteligencia de datos y herramientas críticas para la toma de decisiones</p>
             </a>
-
-            <!-- Future buttons can be added here easily -->
-
-            <!-- Future buttons can be added here easily -->
-            <!-- 
-            <a href="#" class="app-card">
-                <div class="icon-box">📦</div>
-                <div class="app-title">Gestión de Pañol</div>
-                <p class="app-desc">Control de stock y movimientos</p>
-            </a>
-            -->
         </div>
 
+        <footer style="margin-top: 5rem; padding-bottom: 2rem; color: var(--text-muted); font-size: 0.8rem; letter-spacing: 1px; opacity: 0.5;">
+            ARMADA ARGENTINA &bull; COMANDO DE AVIACIÓN NAVAL &bull; 2026
+        </footer>
     </div>
 </body>
 

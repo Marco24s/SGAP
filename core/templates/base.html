@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>S.G.A.P. - Armada Argentina</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css?v=4">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=5">
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
 </head>
 
@@ -85,12 +86,15 @@
                 sidebar.classList.add('collapsed');
             }
 
-            toggleBtn.addEventListener('click', function() {
-                sidebar.classList.toggle('collapsed');
-                localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
-            });
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', function() {
+                    sidebar.classList.toggle('collapsed');
+                    localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+                });
+            }
         });
     </script>
+    {% block scripts %}{% endblock %}
 </body>
 
 </html>

@@ -64,6 +64,30 @@
                         </div>
                     </div>
 
+                    <h5 class="mt-4 mb-3">Talles</h5>
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <label for="{{ form.talle_casco.id_for_label }}" class="form-label">Casco</label>
+                            {{ form.talle_casco }}
+                            {{ form.talle_casco.errors }}
+                        </div>
+                        <div class="col-md-3">
+                            <label for="{{ form.talle_guantes.id_for_label }}" class="form-label">Guantes</label>
+                            {{ form.talle_guantes }}
+                            {{ form.talle_guantes.errors }}
+                        </div>
+                        <div class="col-md-3">
+                            <label for="{{ form.talle_overall.id_for_label }}" class="form-label">Overall</label>
+                            {{ form.talle_overall }}
+                            {{ form.talle_overall.errors }}
+                        </div>
+                        <div class="col-md-3">
+                            <label for="{{ form.talle_botas.id_for_label }}" class="form-label">Botas</label>
+                            {{ form.talle_botas }}
+                            {{ form.talle_botas.errors }}
+                        </div>
+                    </div>
+
                     <div class="mb-3 form-check">
                         {{ form.estado }}
                         <label class="form-check-label" for="{{ form.estado.id_for_label }}">Activo</label>

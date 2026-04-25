@@ -4,20 +4,58 @@ from .models import Credito, Asignacion
 from core.models import ClasificadorGasto, UnidadComponente, EstructuraProgramatica
 from django.contrib import messages
 from django.utils import timezone
-from .forms import CreditoForm
+from .forms import CreditoForm, CreditoAnualForm
 
 @login_required
 def nuevo_credito(request):
     if request.method == "POST":
-        form = CreditoForm(request.POST)
+        form = CreditoAnualForm(request.POST)
         if form.is_valid():
-            credito = form.save(commit=False)
-            credito.estado = 'VIGENTE' # Default state
-            credito.save()
-            messages.success(request, "Nuevo Crédito registrado correctamente.")
+            # Common data
+            anio = form.cleaned_data['anio']
+            tipo_credito = form.cleaned_data['tipo_credito']
+            programa = form.cleaned_data['programa']
+            fuente = form.cleaned_data['fuente']
+            inciso = form.cleaned_data['inciso']
+            principal = form.cleaned_data['principal']
+            
+            # Total Ceiling (Annual)
+            monto_total_anual = float(request.POST.get('monto_total_hidden', 0))
+            
+            created_count = 0
+            # Trimesters 1-4
+            for t in range(1, 5):
+                monto_raw = request.POST.get(f'monto_t{t}', '').replace('.', '')
+                monto = float(monto_raw) if monto_raw else 0
+                recibido = request.POST.get(f'recibido_t{t}') == 'on'
+                
+                if monto > 0:
+                    # Update or Create
+                    Credito.objects.update_or_create(
+                        programa=programa,
+                        fuente=fuente,
+                        anio=anio,
+                        trimestre=t,
+                        inciso=inciso,
+                        principal=principal,
+                        tipo_credito=tipo_credito,
+                        defaults={
+                            'monto_total': monto_total_anual,
+                            'monto_cuota': monto,
+                            'recibido': recibido,
+                            'estado': 'VIGENTE'
+                        }
+                    )
+                    created_count += 1
+            
+            if created_count > 0:
+                messages.success(request, f"Se registraron correctamente las cuotas anuales para el programa {programa}.")
+            else:
+                messages.warning(request, "No se ingresaron montos para ninguna cuota.")
+                
             return redirect('finance:lista_creditos')
     else:
-        form = CreditoForm()
+        form = CreditoAnualForm()
     return render(request, 'finance/nuevo_credito.html', {'form': form, 'title': 'Cargar Nuevo Crédito Presupuestario'})
 
 @login_required
@@ -69,7 +107,7 @@ def lista_creditos(request):
         elif group_by == 'inciso':
             key = (credito.inciso,)
         else: # default
-            key = (credito.programa.id, credito.anio, credito.trimestre, credito.fuente.id, credito.inciso, credito.principal)
+            key = (credito.programa.id, credito.anio, credito.trimestre, credito.fuente.id, credito.inciso, credito.principal, credito.tipo_credito)
             
         # Unique identifier for the "Annual Budget Line"
         budget_key = (credito.programa.id, credito.fuente.id, credito.inciso, credito.anio, credito.principal)
@@ -88,6 +126,7 @@ def lista_creditos(request):
             'cuota': fmt_currency(credito.monto_cuota),
             'monto_raw': credito.monto_total,
             'recibido': credito.recibido,
+            'tipo': credito.tipo_credito,
             'fecha': credito.fecha_creacion.strftime('%d/%m/%Y %H:%M')
         })
         
@@ -105,6 +144,7 @@ def lista_creditos(request):
             grupos[key]['fuente'] = credito.fuente
             grupos[key]['inciso'] = credito.inciso
             grupos[key]['principal'] = credito.principal
+            grupos[key]['tipo'] = credito.tipo_credito
     
     # Convert to list for template
     creditos_agrupados = []
@@ -131,6 +171,7 @@ def lista_creditos(request):
             item['fuente'] = data['fuente']
             item['inciso'] = data['inciso']
             item['principal'] = data.get('principal', '')
+            item['tipo'] = data.get('tipo', 'ASIGNACION')
             
         creditos_agrupados.append(item)
     

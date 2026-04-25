@@ -70,11 +70,14 @@
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
                         <strong class="{% if grupo.is_recibido %}text-success{% else %}text-danger{% endif %}"> $
                             {{grupo.cuota }}</strong>
+                        <span style="font-size: 0.65rem; background: {% if grupo.tipo == 'REFUERZO' %}var(--reinforcement){% else %}var(--primary){% endif %}; color: white; padding: 1px 4px; border-radius: 3px; font-weight: 700; text-transform: uppercase;">
+                            {{ grupo.tipo|slice:":3" }}
+                        </span>
                     </div>
                 </td>
                 <td>
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        <strong>${{ grupo.total }}</strong>
+                        <strong style="color: {% if grupo.tipo == 'REFUERZO' %}var(--reinforcement){% else %}inherit{% endif %};">${{ grupo.total }}</strong>
                     </div>
                 </td>
                 <td>

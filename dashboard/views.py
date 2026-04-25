@@ -19,8 +19,8 @@ def home(request):
     
     for c in creditos_vigentes:
         # Key for Deduplication / Grouping
-        # Include principal to separate them
-        key = (c.programa_id, c.fuente_id, c.inciso, c.principal, c.anio)
+        # Include principal and tipo_credito to separate them correctly
+        key = (c.programa_id, c.fuente_id, c.inciso, c.principal, c.anio, c.tipo_credito)
         
         # 1. Calculate Total Budget (Techo)
         if key not in seen_budgets:
@@ -40,12 +40,16 @@ def home(request):
             }
         
         # Add quarter info
-        # We store the quota amount and the specific credit ID for the link
-        grouped_credits[key]['quarters'][c.trimestre] = {
+        # We store a list of credits for the same quarter to handle both Asignación and Refuerzo
+        if c.trimestre not in grouped_credits[key]['quarters']:
+            grouped_credits[key]['quarters'][c.trimestre] = []
+            
+        grouped_credits[key]['quarters'][c.trimestre].append({
             'amount': c.monto_cuota, # Display Quota Amount
             'id': c.id,
-            'recibido': c.recibido
-        }
+            'recibido': c.recibido,
+            'tipo': c.tipo_credito
+        })
     
     # Total Distributed (Asignado)
     # We sum all assignments related to vigorous credits

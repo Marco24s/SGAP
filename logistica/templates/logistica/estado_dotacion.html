@@ -57,7 +57,11 @@
                                 <ul class="list-group list-group-flush small">
                                     {% for item in p.items %}
                                         <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-1">
-                                            {{ item.tipo }}
+                                            {% if item.estado == 'ok' %}
+                                                <span style="color: #198754 !important; font-weight: bold;">{{ item.tipo }}</span>
+                                            {% else %}
+                                                <span style="color: #dc3545 !important; font-weight: bold;">{{ item.tipo }}</span>
+                                            {% endif %}
                                             <span>
                                                 {% if item.estado == 'ok' %}
                                                     <span class="text-success checkbox-mark">✔</span>

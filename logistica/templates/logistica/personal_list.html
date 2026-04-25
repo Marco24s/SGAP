@@ -201,7 +201,17 @@
                     {% endif %}
                 </td>
                 <td>
-                    <a href="{% url 'logistica:personal_update' p.pk %}" class="btn btn-sm btn-outline-secondary">Editar</a>
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'logistica:personal_update' p.pk %}" class="btn btn-sm btn-outline-secondary" title="Editar">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <form method="post" action="{% url 'logistica:personal_delete' p.pk %}" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar" onclick="return confirm('¿Está seguro de eliminar este registro?');">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                    </div>
                 </td>
             </tr>
             {% empty %}

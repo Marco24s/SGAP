@@ -1,43 +1,46 @@
 :root {
-    /* Color Palette - Dark Aviation Theme */
-    --primary-blue: #3b82f6;
-    /* Blue 500 - Brighter for dark bg */
-    --primary-dark: #1d4ed8;
-    /* Blue 700 */
-    --secondary: #94a3b8;
-    /* Slate 400 */
-
-    --bg-body: #0f172a;
-    /* Slate 900 */
-    --bg-card: #1e293b;
-    /* Slate 800 */
-    --bg-sidebar: #020617;
-    /* Slate 950 */
-
-    --text-main: #f1f5f9;
-    /* Slate 100 */
+    /* Premium Navy & Gold Palette */
+    --primary: #2563eb;
+    --primary-hover: #1d4ed8;
+    --primary-blue: var(--primary);
+    --primary-dark: var(--primary-hover);
+    --accent: #f59e0b;
+    --reinforcement: #06b6d4;
+    
+    --bg-body: #0a0f1d;
+    --bg-card: #161c2d;
+    --bg-sidebar: #050811;
+    --bg-header: rgba(22, 28, 45, 0.8);
+    
+    --text-main: #e2e8f0;
     --text-muted: #94a3b8;
-    /* Slate 400 */
     --text-light: #f8fafc;
-    /* Slate 50 */
-
-    --border-light: #334155;
-    /* Slate 700 */
+    
+    --border-light: rgba(255, 255, 255, 0.08);
+    --border-dim: rgba(255, 255, 255, 0.05);
 
     --success: #10b981;
     --danger: #ef4444;
     --warning: #f59e0b;
+    --info: #3b82f6;
 
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.3);
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.2);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.3);
+    --shadow-lg: 0 12px 24px -10px rgba(0,0,0,0.5);
+    
     --radius: 0.75rem;
+    --radius-lg: 1rem;
+    --glass: blur(10px) saturate(180%);
 }
 
 body {
     margin: 0;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, inherit;
     background-color: var(--bg-body);
+    background-image: radial-gradient(circle at top right, rgba(37, 99, 235, 0.05), transparent 40%),
+                      radial-gradient(circle at bottom left, rgba(37, 99, 235, 0.03), transparent 40%);
     color: var(--text-main);
+    min-height: 100vh;
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
 }
@@ -255,34 +258,75 @@ body {
     background-color: var(--primary-dark);
 }
 
-/* Tables */
-table {
+/* Tables (Premium Refinement) */
+.table-container {
     width: 100%;
-    border-collapse: collapse;
+    overflow-x: auto;
+    border-radius: var(--radius);
+    background: var(--bg-card);
 }
 
-th,
-td {
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+th, td {
+    padding: 1.25rem 1rem;
     text-align: left;
-    padding: 1rem;
-    border-bottom: 1px solid var(--border-light);
+    border-bottom: 1px solid var(--border-dim);
 }
 
 th {
+    background: rgba(255, 255, 255, 0.02);
     color: var(--text-muted);
     font-size: 0.75rem;
     text-transform: uppercase;
-    font-weight: 600;
-    letter-spacing: 0.05em;
+    font-weight: 700;
+    letter-spacing: 0.1em;
 }
 
 td {
-    font-size: 0.875rem;
+    font-size: 0.9rem;
+    color: var(--text-main);
+    vertical-align: middle;
+}
+
+tr:hover td {
+    background: rgba(255, 255, 255, 0.01);
 }
 
 tr:last-child td {
     border-bottom: none;
 }
+
+/* Status Badges */
+.badge {
+    padding: 0.4rem 0.8rem;
+    border-radius: 99px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.badge::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.badge-success { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+.badge-danger { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+.badge-warning { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+.badge-info { background: rgba(59, 130, 246, 0.1); color: var(--info); }
+.badge-muted { background: rgba(148, 163, 184, 0.1); color: var(--text-muted); }
 
 /* Grid for Stats */
 .stats-grid {
@@ -341,80 +385,138 @@ tr:last-child td {
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
 
-/* App Grid Styles (Migrated from landing page) */
+.form-input-large {
+    font-size: 1.25rem !important;
+    font-weight: 700 !important;
+    padding: 0.75rem 1rem !important;
+    color: var(--primary) !important;
+    background-color: rgba(37, 99, 235, 0.05) !important;
+    border: 2px solid rgba(37, 99, 235, 0.2) !important;
+    transition: all 0.3s ease;
+}
+
+.form-input-large:focus {
+    border-color: var(--primary) !important;
+    background-color: rgba(37, 99, 235, 0.08) !important;
+    box-shadow: 0 0 25px rgba(37, 99, 235, 0.15) !important;
+}
+
+/* App Grid Styles (Premium Redesign) */
 .apps-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 2rem;
     width: 100%;
     max-width: 1200px;
-    margin: 0 auto;
-    justify-content: center;
+    margin: 2rem auto;
+    padding: 0 1rem;
+    box-sizing: border-box;
 }
 
 .app-card {
-    background: white;
-    border-radius: 20px;
-    padding: 1.5rem 1.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: var(--glass);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    padding: 2.5rem 2rem;
     text-decoration: none;
     color: var(--text-main);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.1);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1rem;
-    border: 1px solid transparent;
+    text-align: center;
+    gap: 1.25rem;
     position: relative;
     overflow: hidden;
-    max-width: 300px;
-    margin: 0 auto;
+    box-shadow: var(--shadow-md);
 }
 
-/* Dark mode adjustment for cards if bg-card is used, but landing used white. 
-   We keep it white as per original design or adapt to theme? 
-   The landing page forced white background on cards. 
-   We will strictly copy the landing page styles for consistency. 
-*/
+.app-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
 
 .app-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 20px 40px -12px rgba(29, 78, 216, 0.25);
-    border-color: rgba(59, 130, 246, 0.3);
+    transform: translateY(-10px) scale(1.02);
+    border-color: var(--primary);
+    box-shadow: var(--shadow-lg), 0 0 20px rgba(37, 99, 235, 0.2);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.app-card:hover::before {
+    opacity: 1;
 }
 
 .icon-box {
-    width: 60px;
-    height: 60px;
-    background: #eff6ff;
-    border-radius: 50%;
+    width: 80px;
+    height: 80px;
+    background: rgba(37, 99, 235, 0.1);
+    border-radius: 24px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 2rem;
-    color: var(--primary-blue);
-    margin-bottom: 0.25rem;
-    transition: all 0.3s ease;
+    font-size: 2.5rem;
+    color: var(--primary);
+    transition: all 0.5s ease;
+    border: 1px solid rgba(37, 99, 235, 0.1);
+    position: relative;
+    z-index: 1;
 }
 
 .app-card:hover .icon-box {
-    background: var(--primary-blue);
+    background: var(--primary);
     color: white;
-    transform: scale(1.1) rotate(5deg);
+    transform: rotate(5deg) scale(1.1);
+    box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.5);
 }
 
 .app-title {
-    font-size: 1.1rem;
+    font-size: 1.25rem;
     font-weight: 700;
-    color: var(--text-main);
+    color: var(--text-light);
     margin: 0;
-    /* Ensure text color is correct for white card */
-    color: #1e293b; 
+    letter-spacing: -0.02em;
+    position: relative;
+    z-index: 1;
 }
 
 .app-desc {
-    font-size: 0.9rem;
-    color: #64748b; /* text-muted equivalent */
+    font-size: 0.95rem;
+    color: var(--text-muted);
     margin: 0;
-    line-height: 1.5;
+    line-height: 1.6;
+    position: relative;
+    z-index: 1;
+}
+
+.btn-top-right {
+    position: absolute;
+    top: 2rem;
+    right: 2rem;
+    text-decoration: none;
+    color: var(--text-muted);
+    font-weight: 500;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.2rem;
+    border-radius: 99px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-light);
+    transition: all 0.3s;
+}
+
+.btn-top-right:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--danger);
+    border-color: rgba(239, 68, 68, 0.2);
 }

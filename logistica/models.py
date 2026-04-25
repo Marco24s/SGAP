@@ -1,4 +1,6 @@
 from django.db import models
+from django.core.exceptions import ValidationError
+from django.conf import settings
 from django.utils import timezone
 
 class TipoPrenda(models.Model):
@@ -14,15 +16,18 @@ class TipoPrenda(models.Model):
     def __str__(self):
         return f"{self.nombre} ({self.get_categoria_display()})"
 
+ROLES_CHOICES = [
+    ('piloto', 'Piloto'),
+    ('tripulante', 'Tripulante'),
+    ('mecanico', 'Mecánico'),
+    ('administrativo', 'Administrativo'),
+    ('otro', 'Otro'),
+]
+
 class Dotacion(models.Model):
     """Define qué debe tener cada rol"""
-    ROLES_CHOICES = [
-        ('piloto', 'Piloto'),
-        ('tripulante', 'Tripulante'),
-        ('mecanico', 'Mecánico'),
-        ('administrativo', 'Administrativo'),
-        ('otro', 'Otro'),
-    ]
+    """Define qué debe tener cada rol"""
+    # ROLES_CHOICES movido a nivel de módulo
 
     rol = models.CharField(max_length=20, choices=ROLES_CHOICES)
     tipo_prenda = models.ForeignKey(TipoPrenda, on_delete=models.CASCADE)
@@ -52,13 +57,7 @@ class Personal(models.Model):
         ('CV', 'Civil'),
     ]
 
-    ROLES_CHOICES = [
-        ('piloto', 'Piloto'),
-        ('tripulante', 'Tripulante'),
-        ('mecanico', 'Mecánico'),
-        ('administrativo', 'Administrativo'),
-        ('otro', 'Otro'),
-    ]
+    # ROLES_CHOICES definido a nivel de módulo
 
     legajo = models.CharField(max_length=20, unique=True)
     apellido = models.CharField(max_length=100)
@@ -67,6 +66,12 @@ class Personal(models.Model):
     unidad = models.CharField(max_length=100, default='Escuadrilla Aeronaval')
     rol = models.CharField(max_length=20, choices=ROLES_CHOICES)
     estado = models.BooleanField(default=True, help_text="Activo / Baja")
+
+    # Talles
+    talle_casco = models.CharField(max_length=20, blank=True, null=True, verbose_name="Talle de Casco")
+    talle_guantes = models.CharField(max_length=20, blank=True, null=True, verbose_name="Talle de Guantes")
+    talle_overall = models.CharField(max_length=20, blank=True, null=True, verbose_name="Talle de Overall")
+    talle_botas = models.CharField(max_length=20, blank=True, null=True, verbose_name="Talle de Botas")
 
     def __str__(self):
         return f"{self.grado} {self.apellido} {self.nombre}"
@@ -118,6 +123,27 @@ class Asignacion(models.Model):
     motivo = models.CharField(max_length=20, choices=MOTIVO_CHOICES)
     activo = models.BooleanField(default=True)
 
+    def clean(self):
+        if self.activo:
+            qs = Asignacion.objects.filter(
+                prenda=self.prenda,
+                activo=True
+            )
+            if self.pk:
+                qs = qs.exclude(pk=self.pk)
+            if qs.exists():
+                raise ValidationError("La prenda ya tiene una asignación activa.")
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
+        # Actualizar estado de la prenda automáticamente
+        if self.activo:
+            self.prenda.estado = 'asignada'
+        else:
+            self.prenda.estado = 'deposito'
+        self.prenda.save()
+
     def __str__(self):
         return f"{self.prenda} -> {self.personal}"
 
@@ -131,10 +157,11 @@ class Movimiento(models.Model):
         ('modificacion', 'Modificación de Datos'),
     ]
 
+
     prenda = models.ForeignKey(Prenda, on_delete=models.CASCADE, related_name='movimientos')
     tipo = models.CharField(max_length=20, choices=TIPO_MOVIMIENTO_CHOICES)
     fecha = models.DateTimeField(auto_now_add=True)
-    usuario = models.CharField(max_length=100, help_text="Usuario que realizó la acción")
+    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
     observaciones = models.TextField(blank=True)
 
     def __str__(self):

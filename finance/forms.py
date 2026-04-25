@@ -50,8 +50,8 @@ class CreditoForm(forms.ModelForm):
         model = Credito
         fields = ['programa', 'fuente', 'anio', 'trimestre', 'monto_total', 'monto_cuota', 'recibido', 'inciso', 'principal', 'tipo_credito']
         widgets = {
-            'monto_total': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Ej: 15.000.000'}),
-            'monto_cuota': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Ej: 5.000.000'}),
+            'monto_total': forms.TextInput(attrs={'class': 'form-input form-input-large', 'placeholder': 'Ej: 15.000.000'}),
+            'monto_cuota': forms.TextInput(attrs={'class': 'form-input form-input-large', 'placeholder': 'Ej: 5.000.000'}),
             'recibido': forms.CheckboxInput(attrs={'class': 'form-checkbox', 'style': 'width: 1.25rem; height: 1.25rem;'}),
             'inciso': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Ej: 2'}),
             'principal': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Ej: 1'}),
@@ -59,5 +59,18 @@ class CreditoForm(forms.ModelForm):
             'fuente': forms.Select(attrs={'class': 'form-input'}),
             'anio': forms.NumberInput(attrs={'class': 'form-input', 'value': 2026}),
             'trimestre': forms.Select(attrs={'class': 'form-input'}),
+            'tipo_credito': forms.Select(attrs={'class': 'form-input'}),
+        }
+
+class CreditoAnualForm(forms.ModelForm):
+    class Meta:
+        model = Credito
+        fields = ['programa', 'fuente', 'anio', 'inciso', 'principal', 'tipo_credito']
+        widgets = {
+            'inciso': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Ej: 2'}),
+            'principal': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Ej: 1'}),
+            'programa': forms.Select(attrs={'class': 'form-input'}),
+            'fuente': forms.Select(attrs={'class': 'form-input'}),
+            'anio': forms.NumberInput(attrs={'class': 'form-input', 'value': 2026}),
             'tipo_credito': forms.Select(attrs={'class': 'form-input'}),
         }

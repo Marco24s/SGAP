@@ -51,12 +51,17 @@
 <div style="display: grid; grid-template-columns: 1fr; gap: 1.5rem;">
     <!-- Creditos Section -->
     <div class="card">
-        <h3>Mis Créditos (Bolsas a Distribuir)</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3 style="margin: 0;">Mis Créditos (Bolsas a Distribuir)</h3>
+            <button class="btn btn-secondary btn-sm btn-reset-filters" style="font-size: 0.7rem; padding: 0.25rem 0.5rem; opacity: 0.8;">
+                <i class="fas fa-undo-alt"></i> Limpiar Filtros
+            </button>
+        </div>
         {% if creditos %}
         <div style="overflow-x: auto;">
             <table>
                 <thead>
-                    <tr>
+                    <tr class="header-row">
                         <th>Fuente</th>
                         <th>Programa</th>
                         <th>Inciso</th>
@@ -66,6 +71,69 @@
                         <th>T3</th>
                         <th>T4</th>
                         <th>Total (Techo)</th>
+                    </tr>
+                    <tr class="filter-row">
+                        <th>
+                            <div class="excel-filter" data-column="0">
+                                <button class="filter-trigger">Filtrar ▾</button>
+                                <div class="filter-dropdown">
+                                    <div class="filter-search-container"><input type="text" class="filter-search" placeholder="Buscar..."></div>
+                                    <div class="filter-options"></div>
+                                    <div class="filter-actions">
+                                        <button class="filter-btn-all">Todos</button>
+                                        <button class="filter-btn-none">Ninguno</button>
+                                        <button class="filter-btn-apply" style="background: var(--primary); color: white; border: none; font-weight: 600;">OK</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="excel-filter" data-column="1">
+                                <button class="filter-trigger">Filtrar ▾</button>
+                                <div class="filter-dropdown">
+                                    <div class="filter-search-container"><input type="text" class="filter-search" placeholder="Buscar..."></div>
+                                    <div class="filter-options"></div>
+                                    <div class="filter-actions">
+                                        <button class="filter-btn-all">Todos</button>
+                                        <button class="filter-btn-none">Ninguno</button>
+                                        <button class="filter-btn-apply" style="background: var(--primary); color: white; border: none; font-weight: 600;">OK</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="excel-filter" data-column="2">
+                                <button class="filter-trigger">Filtrar ▾</button>
+                                <div class="filter-dropdown">
+                                    <div class="filter-search-container"><input type="text" class="filter-search" placeholder="Buscar..."></div>
+                                    <div class="filter-options"></div>
+                                    <div class="filter-actions">
+                                        <button class="filter-btn-all">Todos</button>
+                                        <button class="filter-btn-none">Ninguno</button>
+                                        <button class="filter-btn-apply" style="background: var(--primary); color: white; border: none; font-weight: 600;">OK</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="excel-filter" data-column="3">
+                                <button class="filter-trigger">Filtrar ▾</button>
+                                <div class="filter-dropdown">
+                                    <div class="filter-search-container"><input type="text" class="filter-search" placeholder="Buscar..."></div>
+                                    <div class="filter-options"></div>
+                                    <div class="filter-actions">
+                                        <button class="filter-btn-all">Todos</button>
+                                        <button class="filter-btn-none">Ninguno</button>
+                                        <button class="filter-btn-apply" style="background: var(--primary); color: white; border: none; font-weight: 600;">OK</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </th>
+                        <th></th> <!-- T1 -->
+                        <th></th> <!-- T2 -->
+                        <th></th> <!-- T3 -->
+                        <th></th> <!-- T4 -->
+                        <th></th> <!-- Total -->
                     </tr>
                 </thead>
                 <tbody>
@@ -84,13 +152,17 @@
                         <!-- T1 -->
                         <td>
                             {% if 1 in group.quarters %}
-                            <div style="display: flex; flex-direction: column;">
-                                <a href="{% url 'finance:distribuir_credito' group.quarters.1.id %}"
-                                    style="text-decoration: none; color: inherit;">
-                                    <span style="font-weight: 600; color: var(--primary-blue); cursor: pointer;">
-                                        ${{ group.quarters.1.amount|floatformat:0|intcomma }}
+                            <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+                                {% for item in group.quarters.1 %}
+                                <a href="{% url 'finance:distribuir_credito' item.id %}" style="text-decoration: none;">
+                                    <span style="font-weight: 600; color: {% if item.tipo == 'REFUERZO' %}var(--reinforcement){% else %}var(--primary){% endif %}; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                                        ${{ item.amount|floatformat:0|intcomma }}
+                                        {% if item.tipo == 'REFUERZO' %}
+                                        <span title="Refuerzo" style="font-size: 0.6rem; background: var(--reinforcement); color: var(--bg-body); padding: 0 3px; border-radius: 2px; font-weight: 900;">R</span>
+                                        {% endif %}
                                     </span>
                                 </a>
+                                {% endfor %}
                             </div>
                             {% else %}
                             <span style="color: var(--text-muted);">-</span>
@@ -100,13 +172,17 @@
                         <!-- T2 -->
                         <td>
                             {% if 2 in group.quarters %}
-                            <div style="display: flex; flex-direction: column;">
-                                <a href="{% url 'finance:distribuir_credito' group.quarters.2.id %}"
-                                    style="text-decoration: none; color: inherit;">
-                                    <span style="font-weight: 600; color: var(--primary-blue); cursor: pointer;">
-                                        ${{ group.quarters.2.amount|floatformat:0|intcomma }}
+                            <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+                                {% for item in group.quarters.2 %}
+                                <a href="{% url 'finance:distribuir_credito' item.id %}" style="text-decoration: none;">
+                                    <span style="font-weight: 600; color: {% if item.tipo == 'REFUERZO' %}var(--reinforcement){% else %}var(--primary){% endif %}; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                                        ${{ item.amount|floatformat:0|intcomma }}
+                                        {% if item.tipo == 'REFUERZO' %}
+                                        <span title="Refuerzo" style="font-size: 0.6rem; background: var(--reinforcement); color: var(--bg-body); padding: 0 3px; border-radius: 2px; font-weight: 900;">R</span>
+                                        {% endif %}
                                     </span>
                                 </a>
+                                {% endfor %}
                             </div>
                             {% else %}
                             <span style="color: var(--text-muted);">-</span>
@@ -116,13 +192,17 @@
                         <!-- T3 -->
                         <td>
                             {% if 3 in group.quarters %}
-                            <div style="display: flex; flex-direction: column;">
-                                <a href="{% url 'finance:distribuir_credito' group.quarters.3.id %}"
-                                    style="text-decoration: none; color: inherit;">
-                                    <span style="font-weight: 600; color: var(--primary-blue); cursor: pointer;">
-                                        ${{ group.quarters.3.amount|floatformat:0|intcomma }}
+                            <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+                                {% for item in group.quarters.3 %}
+                                <a href="{% url 'finance:distribuir_credito' item.id %}" style="text-decoration: none;">
+                                    <span style="font-weight: 600; color: {% if item.tipo == 'REFUERZO' %}var(--reinforcement){% else %}var(--primary){% endif %}; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                                        ${{ item.amount|floatformat:0|intcomma }}
+                                        {% if item.tipo == 'REFUERZO' %}
+                                        <span title="Refuerzo" style="font-size: 0.6rem; background: var(--reinforcement); color: var(--bg-body); padding: 0 3px; border-radius: 2px; font-weight: 900;">R</span>
+                                        {% endif %}
                                     </span>
                                 </a>
+                                {% endfor %}
                             </div>
                             {% else %}
                             <span style="color: var(--text-muted);">-</span>
@@ -132,13 +212,17 @@
                         <!-- T4 -->
                         <td>
                             {% if 4 in group.quarters %}
-                            <div style="display: flex; flex-direction: column;">
-                                <a href="{% url 'finance:distribuir_credito' group.quarters.4.id %}"
-                                    style="text-decoration: none; color: inherit;">
-                                    <span style="font-weight: 600; color: var(--primary-blue); cursor: pointer;">
-                                        ${{ group.quarters.4.amount|floatformat:0|intcomma }}
+                            <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+                                {% for item in group.quarters.4 %}
+                                <a href="{% url 'finance:distribuir_credito' item.id %}" style="text-decoration: none;">
+                                    <span style="font-weight: 600; color: {% if item.tipo == 'REFUERZO' %}var(--reinforcement){% else %}var(--primary){% endif %}; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                                        ${{ item.amount|floatformat:0|intcomma }}
+                                        {% if item.tipo == 'REFUERZO' %}
+                                        <span title="Refuerzo" style="font-size: 0.6rem; background: var(--reinforcement); color: var(--bg-body); padding: 0 3px; border-radius: 2px; font-weight: 900;">R</span>
+                                        {% endif %}
                                     </span>
                                 </a>
+                                {% endfor %}
                             </div>
                             {% else %}
                             <span style="color: var(--text-muted);">-</span>
@@ -161,9 +245,13 @@
         {% endif %}
     </div>
 
-    <!-- Semáforo Section -->
     <div class="card">
-        <h3>Semáforo de Ejecución (Por Unidad)</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3 style="margin: 0;">Semáforo de Ejecución (Por Unidad)</h3>
+            <button class="btn btn-secondary btn-sm btn-reset-filters" style="font-size: 0.7rem; padding: 0.25rem 0.5rem; opacity: 0.8;">
+                <i class="fas fa-undo-alt"></i> Limpiar Filtros
+            </button>
+        </div>
         {% if unidades_stats %}
         <div style="overflow-x: auto;">
             <table>
@@ -174,6 +262,39 @@
                         <th>Comprometido</th>
                         <th>% Ejecución</th>
                         <th>Estado</th>
+                    </tr>
+                    <tr class="filter-row">
+                        <th>
+                            <div class="excel-filter" data-column="0">
+                                <button class="filter-trigger">Filtrar ▾</button>
+                                <div class="filter-dropdown">
+                                    <div class="filter-search-container"><input type="text" class="filter-search" placeholder="Buscar..."></div>
+                                    <div class="filter-options"></div>
+                                    <div class="filter-actions">
+                                        <button class="filter-btn-all">Todos</button>
+                                        <button class="filter-btn-none">Ninguno</button>
+                                        <button class="filter-btn-apply" style="background: var(--primary); color: white; border: none; font-weight: 600;">OK</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th>
+                            <div class="excel-filter" data-column="4">
+                                <button class="filter-trigger">Filtrar ▾</button>
+                                <div class="filter-dropdown">
+                                    <div class="filter-search-container"><input type="text" class="filter-search" placeholder="Buscar..."></div>
+                                    <div class="filter-options"></div>
+                                    <div class="filter-actions">
+                                        <button class="filter-btn-all">Todos</button>
+                                        <button class="filter-btn-none">Ninguno</button>
+                                        <button class="filter-btn-apply" style="background: var(--primary); color: white; border: none; font-weight: 600;">OK</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
@@ -212,5 +333,380 @@
         <p style="padding: 1rem; color: var(--text-muted); text-align: center;">No hay distribución realizada aún.</p>
         {% endif %}
     </div>
+    </div>
 </div>
+
+<style>
+    .filter-row th {
+        padding: 0.5rem !important;
+        background: rgba(255,255,255,0.02);
+    }
+    
+    .excel-filter {
+        position: relative;
+        width: 100%;
+    }
+
+    .filter-trigger {
+        width: 100%;
+        background: rgba(0,0,0,0.2);
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        padding: 0.35rem 0.5rem;
+        color: var(--text-muted);
+        font-size: 0.75rem;
+        text-align: left;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: all 0.2s;
+    }
+
+    .filter-trigger:hover, .filter-trigger.active {
+        border-color: var(--primary);
+        background: rgba(0,0,0,0.4);
+        color: var(--text-main);
+    }
+
+    .filter-dropdown {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        z-index: 1000;
+        min-width: 200px;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        margin-top: 5px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        display: none;
+        backdrop-filter: blur(10px);
+    }
+
+    .filter-dropdown.show {
+        display: block;
+        animation: fadeIn 0.2s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .filter-search-container {
+        padding: 0.75rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .filter-search {
+        width: 100%;
+        background: rgba(0,0,0,0.3);
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        padding: 0.3rem 0.6rem;
+        color: var(--text-main);
+        font-size: 0.8rem;
+    }
+
+    .filter-options {
+        max-height: 200px;
+        overflow-y: auto;
+        padding: 0.5rem 0;
+    }
+
+    .filter-option {
+        padding: 0.4rem 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        transition: background 0.2s;
+    }
+
+    .filter-option:hover {
+        background: rgba(255,255,255,0.05);
+        color: var(--text-main);
+    }
+
+    .filter-option input[type="checkbox"] {
+        accent-color: var(--primary);
+        width: 14px;
+        height: 14px;
+    }
+
+    .filter-actions {
+        padding: 0.5rem 0.75rem;
+        border-top: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        gap: 0.5rem;
+    }
+
+    .filter-actions button {
+        flex: 1;
+        background: none;
+        border: 1px solid var(--border-color);
+        color: var(--text-muted);
+        padding: 0.25rem;
+        font-size: 0.7rem;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .filter-actions button:hover {
+        border-color: var(--primary);
+        color: var(--text-main);
+        background: rgba(37, 99, 235, 0.1);
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    initExcelFilters();
+
+    function initExcelFilters() {
+        const tables = document.querySelectorAll('table');
+        
+        tables.forEach(table => {
+            const filters = table.querySelectorAll('.excel-filter');
+            const tbody = table.querySelector('tbody');
+            if (!tbody) return;
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            
+            filters.forEach(filter => {
+                const colIndex = parseInt(filter.getAttribute('data-column'));
+                const optionsContainer = filter.querySelector('.filter-options');
+                
+                // Get unique values from column
+                const values = new Set();
+                rows.forEach(row => {
+                    if (row.cells[colIndex]) {
+                        const text = row.cells[colIndex].textContent.trim();
+                        if (text) values.add(text);
+                    }
+                });
+                
+                // Add "Select All" checkbox at the top
+                const selectAllDiv = document.createElement('div');
+                selectAllDiv.className = 'filter-option select-all-option';
+                selectAllDiv.style.borderBottom = '1px solid var(--border-color)';
+                selectAllDiv.style.marginBottom = '5px';
+                selectAllDiv.innerHTML = `
+                    <input type="checkbox" class="select-all-cb" checked>
+                    <span style="font-weight: 700;">(Seleccionar todo)</span>
+                `;
+                optionsContainer.appendChild(selectAllDiv);
+
+                // Sort and Create Checkboxes
+                Array.from(values).sort().forEach(val => {
+                    const div = document.createElement('div');
+                    div.className = 'filter-option';
+                    div.innerHTML = `
+                        <input type="checkbox" value="${val}" class="item-cb" checked>
+                        <span>${val}</span>
+                    `;
+                    optionsContainer.appendChild(div);
+                });
+
+                // Toggle logic for Select All
+                const selectAllCb = selectAllDiv.querySelector('.select-all-cb');
+                selectAllCb.addEventListener('change', () => {
+                    const isChecked = selectAllCb.checked;
+                    filter.querySelectorAll('.filter-option:not(.select-all-option)').forEach(opt => {
+                        if (opt.style.display !== 'none') {
+                            opt.querySelector('input').checked = isChecked;
+                        }
+                    });
+                    applyFilters(table);
+                });
+
+                // --- Event Listeners ---
+                
+                // Click on option div toggles checkbox
+                filter.addEventListener('click', (e) => {
+                    const opt = e.target.closest('.filter-option');
+                    if (opt && e.target.tagName !== 'INPUT') {
+                        const cb = opt.querySelector('input');
+                        cb.checked = !cb.checked;
+                        cb.dispatchEvent(new Event('change'));
+                    }
+                });
+
+                // Individual checkbox change
+                filter.addEventListener('change', (e) => {
+                    if (e.target.classList.contains('item-cb')) {
+                        // Update Select All state without applying filters
+                        const allIbs = Array.from(filter.querySelectorAll('.item-cb'));
+                        const allChecked = allIbs.every(cb => cb.checked);
+                        const noneChecked = allIbs.every(cb => !cb.checked);
+                        selectAllCb.checked = allChecked;
+                        selectAllCb.indeterminate = !allChecked && !noneChecked;
+                    }
+                });
+
+                // Trigger and Dropdown elements
+                const trigger = filter.querySelector('.filter-trigger');
+                const dropdown = filter.querySelector('.filter-dropdown');
+                const searchInput = filter.querySelector('.filter-search');
+
+                // Toggle Dropdown
+                trigger.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    document.querySelectorAll('.filter-dropdown.show').forEach(d => {
+                        if (d !== dropdown) d.classList.remove('show');
+                    });
+                    dropdown.classList.toggle('show');
+                    trigger.classList.toggle('active');
+                });
+
+                // Search inside dropdown
+                searchInput.oninput = () => {
+                    const term = searchInput.value.toLowerCase();
+                    filter.querySelectorAll('.filter-option:not(.select-all-option)').forEach(opt => {
+                        const text = opt.textContent.toLowerCase();
+                        opt.style.display = text.includes(term) ? 'flex' : 'none';
+                    });
+                };
+
+                // Apply button change
+                filter.querySelector('.filter-btn-apply').onclick = () => {
+                    applyFilters(table);
+                    dropdown.classList.remove('show');
+                    trigger.classList.remove('active');
+                };
+
+                // Multi-select actions (Instant Reset for these)
+                filter.querySelector('.filter-btn-all').onclick = () => {
+                    filter.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
+                    applyFilters(table);
+                };
+                
+                filter.querySelector('.filter-btn-none').onclick = () => {
+                    filter.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+                };
+            });
+        });
+
+        // Global click to close
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.filter-dropdown.show').forEach(d => d.classList.remove('show'));
+            document.querySelectorAll('.filter-trigger.active').forEach(t => t.classList.remove('active'));
+        });
+
+        document.querySelectorAll('.filter-dropdown').forEach(d => {
+            d.addEventListener('click', (e) => e.stopPropagation());
+        });
+
+        // Add handler for Global Reset buttons
+        document.querySelectorAll('.btn-reset-filters').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const table = btn.closest('.card').querySelector('table');
+                if (!table) return;
+
+                // 1. Reset all checkboxes
+                table.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                    cb.checked = true;
+                    cb.indeterminate = false;
+                });
+
+                // 2. Clear all searches
+                table.querySelectorAll('.filter-search').forEach(input => {
+                    input.value = '';
+                    input.dispatchEvent(new Event('input'));
+                });
+
+                // 3. Re-apply
+                applyFilters(table);
+            });
+        });
+    }
+
+    function applyFilters(table) {
+        const tbody = table.querySelector('tbody');
+        if (!tbody) return;
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        const filters = Array.from(table.querySelectorAll('.excel-filter'));
+        
+        // 1. Get current criteria for all columns
+        const allCriteria = {};
+        filters.forEach(filter => {
+            const colIndex = filter.getAttribute('data-column');
+            allCriteria[colIndex] = Array.from(filter.querySelectorAll('.item-cb:checked')).map(cb => cb.value);
+            
+            // Update trigger UI
+            const trigger = filter.querySelector('.filter-trigger');
+            const total = filter.querySelectorAll('.item-cb').length;
+            const selected = allCriteria[colIndex];
+            if (selected.length === total && total > 0) {
+                trigger.innerHTML = 'Todo <span style="font-size:0.6rem; opacity:0.5; margin-left:4px;">▾</span>';
+                trigger.style.color = 'var(--text-muted)';
+            } else if (selected.length === 0) {
+                trigger.innerHTML = 'Ninguno <span style="font-size:0.6rem; opacity:0.5; margin-left:4px;">▾</span>';
+                trigger.style.color = 'var(--danger)';
+            } else {
+                trigger.innerHTML = `${selected.length} selec. <span style="font-size:0.6rem; opacity:0.5; margin-left:4px;">▾</span>`;
+                trigger.style.color = 'var(--primary)';
+            }
+        });
+
+        // 2. Apply filtering to rows (Main Visibility)
+        rows.forEach(row => {
+            let isVisible = true;
+            for (let colStr in allCriteria) {
+                const colIdx = parseInt(colStr);
+                const selectedValues = allCriteria[colStr];
+                if (row.cells[colIdx]) {
+                    const cellText = row.cells[colIdx].textContent.trim();
+                    if (!selectedValues.includes(cellText)) {
+                        isVisible = false;
+                        break;
+                    }
+                }
+            }
+            row.style.display = isVisible ? '' : 'none';
+        });
+
+        // 3. Update Dropdown Options Visibility (Cascading / Dependent Filters)
+        // For each filter, identify which values are available given filters on OTHER columns
+        filters.forEach(currentFilter => {
+            const currentColIdxStr = currentFilter.getAttribute('data-column');
+            const currentColIdx = parseInt(currentColIdxStr);
+            
+            // Calculate which rows would be visible if we ignore THIS filter
+            const rowsVisibleByOthers = rows.filter(row => {
+                let matchesOthers = true;
+                for (let otherColStr in allCriteria) {
+                    if (otherColStr === currentColIdxStr) continue; // Skip current column filter
+                    
+                    const otherColIdx = parseInt(otherColStr);
+                    const selectedValues = allCriteria[otherColStr];
+                    if (row.cells[otherColIdx]) {
+                        const cellText = row.cells[otherColIdx].textContent.trim();
+                        if (!selectedValues.includes(cellText)) {
+                            matchesOthers = false;
+                            break;
+                        }
+                    }
+                }
+                return matchesOthers;
+            });
+
+            // Unique values present in these rows for the current column
+            const availableValues = new Set(rowsVisibleByOthers.map(row => 
+                row.cells[currentColIdx] ? row.cells[currentColIdx].textContent.trim() : ''
+            ));
+
+            // Hide/Show options in the dropdown
+            currentFilter.querySelectorAll('.filter-option:not(.select-all-option)').forEach(opt => {
+                const val = opt.querySelector('input').value;
+                opt.style.display = availableValues.has(val) ? 'flex' : 'none';
+            });
+        });
+    }
+});
+</script>
 {% endblock %}

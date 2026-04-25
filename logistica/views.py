@@ -1,10 +1,152 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .models import Personal, Prenda, Asignacion, Movimiento, Dotacion, TipoPrenda
+from .models import Personal, Prenda, Asignacion, Movimiento, Dotacion, TipoPrenda, ROLES_CHOICES
 from django.utils import timezone
 from django.contrib import messages
+from django.db.models import Q
+from datetime import date, timedelta
 
 from .forms import PersonalForm, PrendaForm, AsignacionForm, TipoPrendaForm, DotacionForm
+
+def add_months(sourcedate, months):
+    month = sourcedate.month - 1 + months
+    year = sourcedate.year + month // 12
+    month = month % 12 + 1
+    day = min(sourcedate.day, [31,
+        29 if year % 4 == 0 and not year % 400 == 0 else 28,
+        31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month-1])
+    return date(year, month, day)
+
+@login_required
+def necesidades_compra(request):
+    anio_actual = timezone.now().year
+    anio_proximo = anio_actual + 1
+    fin_anio_proximo = date(anio_proximo, 12, 31)
+    
+    personal_activo = Personal.objects.filter(estado=True)
+    necesidades_detalle = []
+    
+    # Mapping simple para talles
+    def get_talle(personal, tipo_nombre):
+        nombre_lower = tipo_nombre.lower()
+        if 'casco' in nombre_lower: return personal.talle_casco
+        if 'guante' in nombre_lower: return personal.talle_guantes
+        if 'over' in nombre_lower or 'mono' in nombre_lower or 'buzo' in nombre_lower: return personal.talle_overall
+        if 'bota' in nombre_lower or 'calzado' in nombre_lower: return personal.talle_botas
+        return 'N/A' # Default si no matchea nada especifico
+
+    for p in personal_activo:
+        # Obtener dotacion requerida para su rol
+        dotacion = Dotacion.objects.filter(rol=p.rol)
+        
+        for item in dotacion:
+            tipo = item.tipo_prenda
+            talle = get_talle(p, tipo.nombre) or "Sin Talle"
+            
+            # Buscar asignacion activa
+            asignacion = Asignacion.objects.filter(
+                personal=p, 
+                prenda__tipo_prenda=tipo, 
+                activo=True
+            ).order_by('-fecha_entrega').first()
+            
+            necesidad = None
+            
+            if not asignacion:
+                # Faltante detectado
+                necesidad = {
+                    'personal': p,
+                    'tipo': tipo.nombre,
+                    'talle': talle,
+                    'motivo': 'Faltante',
+                    'fecha_limite': timezone.now().date(),
+                    'sort_date': timezone.now().date()
+                }
+            else:
+                # Calcular vencimiento
+                meses_duracion = item.renovacion_int
+                fecha_vencimiento = add_months(asignacion.fecha_entrega, meses_duracion)
+                
+                if fecha_vencimiento <= fin_anio_proximo:
+                    necesidad = {
+                        'personal': p,
+                        'tipo': tipo.nombre,
+                        'talle': talle,
+                        'motivo': 'Vencimiento',
+                        'fecha_limite': fecha_vencimiento,
+                        'sort_date': fecha_vencimiento
+                    }
+            
+            if necesidad:
+                necesidades_detalle.append(necesidad)
+    
+    # Agrupar para resumen (Pivot Table: Tipo vs Talles)
+    # 1. Collect all unique talles and types
+    all_talles = set()
+    resumen_matrix = {} # { 'Tipo': { 'term_people': { 'Talle': [list of names] }, 'total_people': [list of names] } }
+
+    for n in necesidades_detalle:
+        tipo = n['tipo']
+        talle = n['talle']
+        persona_str = f"{n['personal'].grado} {n['personal'].apellido} {n['personal'].nombre}"
+        
+        all_talles.add(talle)
+        
+        if tipo not in resumen_matrix:
+            resumen_matrix[tipo] = {'term_people': {}, 'total_people': []}
+        
+        if talle not in resumen_matrix[tipo]['term_people']:
+            resumen_matrix[tipo]['term_people'][talle] = []
+            
+        resumen_matrix[tipo]['term_people'][talle].append(persona_str)
+        resumen_matrix[tipo]['total_people'].append(persona_str)
+
+    # 2. Sort Talles (Try to sort numerically if possible, otherwise alphabetic)
+    def sort_talle_key(t):
+        try:
+            return (0, int(t))
+        except ValueError:
+            return (1, t)
+            
+    sorted_talles = sorted(list(all_talles), key=sort_talle_key)
+    
+    # 3. Sort Tipos
+    sorted_tipos = sorted(resumen_matrix.keys())
+    
+    # 4. Build Rows for Template
+    pivot_rows = []
+    for tipo in sorted_tipos:
+        # Get total count and people
+        total_people = resumen_matrix[tipo]['total_people']
+        
+        row_data = {
+            'tipo': tipo,
+            'counts': [], # Will store dicts: { 'count': N, 'people': [list] }
+            'total': len(total_people),
+            'total_people': total_people
+        }
+        for talle in sorted_talles:
+            people_list = resumen_matrix[tipo]['term_people'].get(talle, [])
+            count = len(people_list)
+            
+            cell_data = {
+                'count': count if count > 0 else '-',
+                'people': people_list,
+                'talle': talle
+            }
+            row_data['counts'].append(cell_data)
+            
+        pivot_rows.append(row_data)
+
+    # Ordenar detalle por fecha para la lista inferior
+    necesidades_detalle.sort(key=lambda x: x['sort_date'])
+
+    return render(request, 'logistica/necesidades_compra.html', {
+        'pivot_rows': pivot_rows,
+        'sorted_talles': sorted_talles,
+        'necesidades_detalle': necesidades_detalle,
+        'anio_proximo': anio_proximo
+    })
 
 @login_required
 def index(request):
@@ -38,7 +180,7 @@ def index(request):
     grand_activo = 0
     grand_baja = 0
 
-    for codigo, nombre in Personal.ROLES_CHOICES:
+    for codigo, nombre in ROLES_CHOICES:
         # Filter by role on top of the base queryset (which might be filtered by unit/grado)
         p_qs = p_base_qs.filter(rol=codigo)
         
@@ -172,6 +314,15 @@ def personal_update(request, pk):
         form = PersonalForm(instance=personal)
     return render(request, 'logistica/personal_form.html', {'form': form, 'update': True})
 
+@login_required
+def personal_delete(request, pk):
+    personal = get_object_or_404(Personal, pk=pk)
+    if request.method == 'POST':
+        personal.delete()
+        messages.success(request, "Personal eliminado correctamente.")
+        return redirect('logistica:personal_list')
+    return redirect('logistica:personal_list')
+
 # --- Prenda Views ---
 @login_required
 def prenda_list(request):
@@ -188,7 +339,7 @@ def prenda_create(request):
             Movimiento.objects.create(
                 prenda=prenda,
                 tipo='alta',
-                usuario=request.user.username,
+                usuario=request.user,
                 observaciones=f"Alta inicial: {prenda.descripcion}"
             )
             messages.success(request, "Prenda registrada exitosamente.")
@@ -208,7 +359,7 @@ def prenda_update(request, pk):
             Movimiento.objects.create(
                 prenda=prenda,
                 tipo='modificacion',
-                usuario=request.user.username,
+                usuario=request.user,
                 observaciones=f"Modificación de datos: {prenda.codigo_interno}"
             )
             messages.success(request, "Prenda actualizada correctamente.")
@@ -246,7 +397,7 @@ def asignacion_create(request):
             Movimiento.objects.create(
                 prenda=prenda,
                 tipo='asignacion',
-                usuario=request.user.username,
+                usuario=request.user,
                 observaciones=f"Asignada a {asignacion.personal}"
             )
 

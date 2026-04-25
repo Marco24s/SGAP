@@ -6,11 +6,13 @@ app_name = 'logistica'
 urlpatterns = [
     # Dashboard / Index
     path('', views.index, name='index'),
+    path('necesidades-compra/', views.necesidades_compra, name='necesidades_compra'),
 
     # Personal URLs
     path('personal/', views.personal_list, name='personal_list'),
     path('personal/crear/', views.personal_create, name='personal_create'),
     path('personal/<int:pk>/editar/', views.personal_update, name='personal_update'),
+    path('personal/<int:pk>/eliminar/', views.personal_delete, name='personal_delete'),
 
     # Prenda URLs
     path('prendas/', views.prenda_list, name='prenda_list'),

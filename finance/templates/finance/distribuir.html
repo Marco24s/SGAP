@@ -3,36 +3,37 @@
 {% block page_title %}Distribuir Crédito: {{ credito.programa }}{% endblock %}
 
 {% block content %}
-<div class="card">
+<div class="card" style="border-left: 4px solid var(--primary); background: linear-gradient(to right, rgba(37, 99, 235, 0.05), transparent);">
     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem;">
         <div>
-            <h2 style="font-size: 1.1rem; margin-bottom: 0.5rem;">Resumen del Crédito</h2>
-            <div style="display: grid; grid-template-columns: repeat(4, auto); gap: 2rem;">
-                <div>
-                    <small style="color: var(--text-muted); display: block;">Fuente Financiamiento</small>
-                    <strong>{{ credito.fuente }}</strong>
-                </div>
-                <div>
-                    <small style="color: var(--text-muted); display: block;">Saldo Parcial Asignado (Cuotas
-                        Recibidas)</small>
-                    <strong style="color: var(--success); font-size: 1.1rem;">${{ saldo_parcial_asignado }}</strong>
-                </div>
-                <div>
-                    <small style="color: var(--text-muted); display: block;">Saldo Asignado (Distribuido)</small>
-                    <strong style="color: var(--primary-blue); font-size: 1.1rem;">${{ total_distribuido }}</strong>
-                </div>
-                <div>
-                    <small style="color: var(--text-muted); display: block;">Saldo Pendiente de Asignar</small>
-                    <strong style="color: var(--warning); font-size: 1.1rem;">${{ credito.saldo_disponible }}</strong>
-                </div>
-                <div>
-                    <small style="color: var(--text-muted); display: block;">Total Asignado (Techo Anual)</small>
-                    <strong style="color: white; font-size: 1.1rem;">${{ credito.monto_total }}</strong>
-                </div>
-            </div>
+            <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.25rem;">Gestión de Distribución</h2>
+            <p style="color: var(--text-muted); margin: 0; font-size: 0.9rem;">Asignación de crédito presupuestario a Unidades Componentes.</p>
         </div>
-        <a href="{% url 'finance:lista_creditos' %}" class="btn">Volver</a>
+        <a href="{% url 'finance:lista_creditos' %}" class="btn btn-secondary">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 0.5rem;"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            Volver
+        </a>
     </div>
+
+    <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+        <div class="stat-card" style="text-align: left; padding: 1.25rem;">
+            <div class="stat-label">Fuente Financiamiento</div>
+            <div class="stat-value" style="font-size: 1.25rem;">{{ credito.fuente }}</div>
+        </div>
+        <div class="stat-card" style="text-align: left; padding: 1.25rem; border-bottom: 2px solid var(--success);">
+            <div class="stat-label">Saldo Parcial (Cuotas)</div>
+            <div class="stat-value" style="font-size: 1.25rem; color: var(--success);">${{ saldo_parcial_asignado }}</div>
+        </div>
+        <div class="stat-card" style="text-align: left; padding: 1.25rem; border-bottom: 2px solid var(--primary);">
+            <div class="stat-label">Distribuido</div>
+            <div class="stat-value" style="font-size: 1.25rem; color: var(--primary);">${{ total_distribuido }}</div>
+        </div>
+        <div class="stat-card" style="text-align: left; padding: 1.25rem; border-bottom: 2px solid var(--warning);">
+            <div class="stat-label">Pendiente</div>
+            <div class="stat-value" style="font-size: 1.25rem; color: var(--warning);">${{ credito.saldo_disponible }}</div>
+        </div>
+    </div>
+</div>
 
     <form method="POST">
         {% csrf_token %}
@@ -67,7 +68,7 @@
             <label style="display: block; margin-bottom: 1rem; font-weight: 500;">2. Detalles de Asignación</label>
 
             <div
-                style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 6px; padding: 1.5rem; max-width: 600px;">
+                style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 6px; padding: 1.5rem; max-width: 800px;">
                 <div style="display: grid; gap: 1rem;">
 
                     <div
@@ -118,7 +119,7 @@
 
                     <div>
                         <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem;">Monto a Asignar</label>
-                        <input type="text" id="monto-input" name="monto" class="form-input" placeholder="$0.00" required
+                        <input type="text" id="monto-input" name="monto" class="form-input form-input-large" placeholder="$0.00" required
                             autocomplete="off">
                     </div>
 
@@ -130,7 +131,7 @@
         <div style="margin-bottom: 2rem;">
             <label style="display: block; margin-bottom: 1rem; font-weight: 500;">3. Referencias GFH (Opcional)</label>
             <div
-                style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 6px; padding: 1.5rem; max-width: 600px;">
+                style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 6px; padding: 1.5rem; max-width: 800px;">
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
                     <div>
                         <label
@@ -244,69 +245,83 @@
 
 <!-- History Table -->
 <div class="card" style="margin-top: 2rem;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-        <h3 style="margin: 0;">Historial de Asignaciones</h3>
-        <input type="text" id="table-search" class="form-input" placeholder="Buscar..." style="width: 250px; padding: 0.4rem 0.8rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; gap: 1rem;">
+        <h3 style="margin: 0; font-size: 1.1rem;">Historial de Asignaciones</h3>
+        <div style="position: relative; width: 300px;">
+            <input type="text" id="table-search" class="form-input" placeholder="Buscar unidad, obra u objeto..." style="padding-left: 2.5rem;">
+            <span style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); opacity: 0.4;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            </span>
+        </div>
     </div>
-    {% if asignaciones %}
-    <table>
-        <thead>
-            <tr>
-                <th>Unidad</th>
-                <th>Clasificador</th>
-                <th>Obra</th>
-                <th>Objeto</th>
-                <th>Monto</th>
-                <th style="text-align: right;">Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for a in asignaciones %}
-            <tr>
-                <td>{{ a.uucc.codigo }} ({{ a.uucc.sigla }})</td>
-                <td>{{ a.clasificador_gasto.codigo }} - {{ a.clasificador_gasto.descripcion }}</td>
-                <td>{{ a.obra.codigo|default:"-" }}</td>
-                <td>{{ a.objeto|default:"-" }}</td>
-                <td>${{ a.monto }}</td>
-                <td style="color: var(--success);">Asignado</td>
-                <td style="text-align: right;">
-                    <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
-                        <!-- Edit Button -->
-                        <button type="button"
-                            onclick="editarAsignacion('{{ a.id }}', '{{ a.uucc.id }}', '{{ a.obra.id|default_if_none:'' }}', '{{ a.monto|stringformat:'f' }}', '{{ a.uucc.codigo }} ({{ a.uucc.sigla }})', '{{ a.solicitud_gfh|default_if_none:'' }}', '{{ a.asignacion_gfh|default_if_none:'' }}', '{{ a.objeto|default_if_none:'' }}')"
-                            style="background: none; border: none; cursor: pointer; color: var(--primary-blue);"
-                            title="Editar">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                            </svg>
-                        </button>
 
-                        <!-- Delete Button -->
-                        <button type="button"
-                            onclick="confirmarEliminacion('{% url 'finance:eliminar_asignacion' a.id %}')"
-                            style="background: none; border: none; cursor: pointer; color: var(--danger); display: flex; align-items: center;"
-                            title="Eliminar">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <polyline points="3 6 5 6 21 6"></polyline>
-                                <path
-                                    d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
-                                </path>
-                            </svg>
-                        </button>
-                    </div>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    {% if asignaciones %}
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Unidad</th>
+                    <th>Clasificador</th>
+                    <th>Obra</th>
+                    <th>Objeto</th>
+                    <th>Monto</th>
+                    <th style="text-align: right; width: 120px;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for a in asignaciones %}
+                <tr>
+                    <td style="font-weight: 600;">{{ a.uucc.codigo }} ({{ a.uucc.sigla }})</td>
+                    <td style="font-size: 0.85rem; color: var(--text-muted);">{{ a.clasificador_gasto.codigo }} - {{ a.clasificador_gasto.descripcion }}</td>
+                    <td><code>{{ a.obra.codigo|default:"-" }}</code></td>
+                    <td><span class="badge badge-info" style="font-size: 0.7rem;">{{ a.objeto|default:"-" }}</span></td>
+                    <td style="font-weight: 700; color: var(--primary);">${{ a.monto }}</td>
+                    <td style="text-align: right;">
+                        <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+                            <!-- Edit Button -->
+                            <button type="button"
+                                onclick="editarAsignacion('{{ a.id }}', '{{ a.uucc.id }}', '{{ a.obra.id|default_if_none:'' }}', '{{ a.monto|stringformat:'f' }}', '{{ a.uucc.codigo }} ({{ a.uucc.sigla }})', '{{ a.solicitud_gfh|default_if_none:'' }}', '{{ a.asignacion_gfh|default_if_none:'' }}', '{{ a.objeto|default_if_none:'' }}')"
+                                style="background: rgba(37, 99, 235, 0.1); border: 1px solid rgba(37, 99, 235, 0.2); border-radius: 6px; padding: 0.4rem; cursor: pointer; color: var(--primary); display: flex; align-items: center; transition: all 0.2s;"
+                                title="Editar"
+                                onmouseover="this.style.background='var(--primary)'; this.style.color='white';"
+                                onmouseout="this.style.background='rgba(37, 99, 235, 0.1)'; this.style.color='var(--primary)';"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                </svg>
+                            </button>
+    
+                            <!-- Delete Button -->
+                            <button type="button"
+                                onclick="confirmarEliminacion('{% url 'finance:eliminar_asignacion' a.id %}')"
+                                style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 6px; padding: 0.4rem; cursor: pointer; color: var(--danger); display: flex; align-items: center; transition: all 0.2s;"
+                                title="Eliminar"
+                                onmouseover="this.style.background='var(--danger)'; this.style.color='white';"
+                                onmouseout="this.style.background='rgba(239, 68, 68, 0.1)'; this.style.color='var(--danger)';"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
     {% else %}
-    <p style="padding: 1rem; color: var(--text-muted);">Aún no se han distribuido fondos de este crédito.</p>
+    <div style="text-align: center; padding: 3rem; color: var(--text-muted); background: rgba(0,0,0,0.1); border-radius: var(--radius);">
+        <p style="margin: 0;">Aún no se han distribuido fondos de este crédito.</p>
+    </div>
     {% endif %}
+</div>
 </div>
 
 <!-- Delete Confirmation Modal -->
@@ -398,8 +413,8 @@
                     <label
                         style="display: block; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.25rem;">Monto
                         a Asignar</label>
-                    <input type="text" id="edit_monto_input" name="monto" class="form-input"
-                        style="font-size: 1.25rem; font-weight: 600; color: var(--primary-blue);" autocomplete="off">
+                    <input type="text" id="edit_monto_input" name="monto" class="form-input form-input-large"
+                        style="color: var(--primary-blue);" autocomplete="off">
                 </div>
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
